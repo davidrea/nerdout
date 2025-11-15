@@ -4,6 +4,7 @@
 
 	export let criteria: Criterion[] = [];
 	export let onCriteriaUpdate: (criteria: Criterion[]) => void = () => {};
+	export let savedComparisonMatrix: Record<string, Record<string, 'up' | 'left' | 'equal'>> | undefined = undefined;
 </script>
 
 <div class="space-y-6">
@@ -19,9 +20,10 @@
 		<div>
 			<h3 class="text-lg font-semibold mb-4">Criteria Weight Matrix</h3>
 			<p class="text-sm text-gray-600 mb-4">Compare criteria pairwise to determine their relative weights. The matrix reflects typical fountain pen enthusiast preferences.</p>
-			<CriteriaMatrix 
-				{criteria} 
+			<CriteriaMatrix
+				{criteria}
 				{onCriteriaUpdate}
+				{savedComparisonMatrix}
 			/>
 		</div>
 	{/if}

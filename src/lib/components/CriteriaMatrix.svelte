@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Criterion } from '../types';
+	import { saveComparisonMatrix } from '../preferences';
 
 	export let criteria: Criterion[] = [];
 	export let onCriteriaUpdate: (criteria: Criterion[]) => void = () => {};
+	export let savedComparisonMatrix: Record<string, Record<string, 'up' | 'left' | 'equal'>> | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -72,8 +74,17 @@
 	}
 
 	function initializeMatrix() {
+		// Check if we have saved comparison matrix to restore
+		if (savedComparisonMatrix && Object.keys(savedComparisonMatrix).length > 0) {
+			comparisonMatrix = savedComparisonMatrix;
+			matrixInitialized = true;
+			calculateWeights();
+			return;
+		}
+
+		// Otherwise, create default matrix
 		const matrix: Record<string, Record<string, 'up' | 'left' | 'equal'>> = {};
-		
+
 		criteria.forEach(critA => {
 			matrix[critA.id] = {};
 			criteria.forEach(critB => {
@@ -84,10 +95,10 @@
 				}
 			});
 		});
-		
+
 		comparisonMatrix = matrix;
 		matrixInitialized = true;
-		
+
 		// Calculate weights from the default matrix
 		calculateWeights();
 	}
@@ -134,7 +145,10 @@
 		
 		// Update the matrix
 		comparisonMatrix = newMatrix;
-		
+
+		// Save to local storage
+		saveComparisonMatrix(comparisonMatrix);
+
 		// Recalculate weights
 		calculateWeights();
 	}

@@ -4,9 +4,11 @@
 	import NerdWayOut from '$lib/components/NerdWayOut.svelte';
 	import NerdWayWayOut from '$lib/components/NerdWayWayOut.svelte';
 	import FilterPanel from '$lib/components/FilterPanel.svelte';
+	import Toast from '$lib/components/Toast.svelte';
 	import type { Item, Criterion, FilterRule } from '$lib/types';
 	import { applyFilters, searchItems } from '$lib/filtering';
 	import { objectiveFountainPens, objectiveFountainPenCriteria } from '$lib/data/objectiveFountainPens';
+	import { loadPreferences, applyCriteriaScores } from '$lib/preferences';
 
 	let items: Item[] = [];
 	let criteria: Criterion[] = [];
@@ -22,10 +24,29 @@
 	let selectedPriceMin: number = 0;
 	let selectedPriceMax: number = 10000;
 
+	// Toast notification state
+	let showToast: boolean = false;
+	let toastMessage: string = '';
+	let savedComparisonMatrix: Record<string, Record<string, 'up' | 'left' | 'equal'>> | undefined;
+
 	// Initialize data
 	onMount(() => {
 		items = [...objectiveFountainPens];
 		criteria = [...objectiveFountainPenCriteria];
+
+		// Load saved preferences from local storage
+		const savedPreferences = loadPreferences();
+		if (savedPreferences) {
+			// Apply saved criteria scores
+			criteria = applyCriteriaScores(criteria, savedPreferences);
+
+			// Store comparison matrix to pass to NerdWayWayOut component
+			savedComparisonMatrix = savedPreferences.comparisonMatrix;
+
+			// Show toast notification
+			showToast = true;
+			toastMessage = 'Your preferences have been restored';
+		}
 
 		// Calculate min/max prices from all items
 		if (items.length > 0) {
@@ -221,6 +242,7 @@
 		<section id="nerdwaywayout" class="mb-12">
 			<NerdWayWayOut
 				{criteria}
+				{savedComparisonMatrix}
 				onCriteriaUpdate={handleCriteriaUpdate}
 			/>
 		</section>
@@ -241,6 +263,14 @@
 		</div>
 	</footer>
 </div>
+
+<!-- Toast notification -->
+{#if showToast}
+	<Toast
+		message={toastMessage}
+		onClose={() => showToast = false}
+	/>
+{/if}
 
 <style>
 	/* Smooth scrolling behavior */

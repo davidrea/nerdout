@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Criterion, CriterionValue } from '../types';
+	import { saveCriteriaScores } from '../preferences';
 
 	export let criteria: Criterion[] = [];
 	export let onCriteriaUpdate: (criteria: Criterion[]) => void = () => {};
@@ -31,6 +32,10 @@
 			}
 			return criterion;
 		});
+
+		// Save to local storage
+		saveCriteriaScores(updatedCriteria);
+
 		onCriteriaUpdate(updatedCriteria);
 	}
 
