@@ -129,14 +129,14 @@
 		svg.selectAll('.point')
 			.attr('r', (d: any) => d.id === highlightedItem ? 8 : 5)
 			.attr('fill', (d: any) => {
-				if (d.id === highlightedItem) return '#3b82f6';
+				if (d.id === highlightedItem) return '#b8860b'; // brass-600
 				const color = getNibMaterialColor(d.specs.nib_material);
 				return color === 'transparent' ? 'none' : color;
 			})
 			.attr('stroke', (d: any) => {
-				if (d.id === highlightedItem) return '#fff';
+				if (d.id === highlightedItem) return '#6b4b0e'; // brass-900
 				const color = getNibMaterialColor(d.specs.nib_material);
-				return color === 'transparent' ? '#6b7280' : '#fff';
+				return color === 'transparent' ? '#6b6b6b' : '#faf7f2'; // charcoal-lighter : parchment-100
 			});
 	}
 
@@ -176,6 +176,12 @@
 			.range([height, 0])
 			.nice();
 
+		// Style axes
+		g.selectAll('.domain, .tick line')
+			.attr('stroke', '#aab8ca'); // ink-300
+		g.selectAll('.tick text')
+			.attr('fill', '#4a4a4a'); // charcoal-light
+
 		// Axes
 		g.append('g')
 			.attr('transform', `translate(0,${height})`)
@@ -183,8 +189,9 @@
 			.append('text')
 			.attr('x', width / 2)
 			.attr('y', 35)
-			.attr('fill', 'black')
+			.attr('fill', '#2d2d2d') // charcoal
 			.style('text-anchor', 'middle')
+			.style('font-weight', '500')
 			.text('Cost ($)');
 
 		g.append('g')
@@ -193,8 +200,9 @@
 			.attr('transform', 'rotate(-90)')
 			.attr('y', -40)
 			.attr('x', -height / 2)
-			.attr('fill', 'black')
+			.attr('fill', '#2d2d2d') // charcoal
 			.style('text-anchor', 'middle')
+			.style('font-weight', '500')
 			.text('Score');
 
 		// Legend for nib materials
@@ -227,7 +235,7 @@
 				.attr('y', 0)
 				.attr('dy', '0.35em')
 				.style('font-size', '11px')
-				.style('fill', '#4b5563')
+				.style('fill', '#4a4a4a') // charcoal-light
 				.text(item.label);
 		});
 
@@ -241,13 +249,14 @@
 			.attr('cy', d => yScale(d.score))
 			.attr('r', d => d.id === highlightedItem ? 8 : 5)
 			.attr('fill', d => {
-				if (d.id === highlightedItem) return '#3b82f6';
+				if (d.id === highlightedItem) return '#b8860b'; // brass-600
 				const color = getNibMaterialColor(d.specs.nib_material);
 				return color === 'transparent' ? 'none' : color;
 			})
 			.attr('stroke', d => {
+				if (d.id === highlightedItem) return '#6b4b0e'; // brass-900
 				const color = getNibMaterialColor(d.specs.nib_material);
-				return color === 'transparent' ? '#6b7280' : '#fff';
+				return color === 'transparent' ? '#6b6b6b' : '#faf7f2'; // charcoal-lighter : parchment-100
 			})
 			.attr('stroke-width', d => {
 				const color = getNibMaterialColor(d.specs.nib_material);
@@ -255,7 +264,10 @@
 			})
 			.style('cursor', 'pointer')
 			.on('mouseover', function(event, d) {
-				d3.select(this).attr('r', 8).attr('fill', '#3b82f6');
+				d3.select(this)
+					.attr('r', 8)
+					.attr('fill', '#b8860b') // brass-600
+					.attr('stroke', '#6b4b0e'); // brass-900
 				showTooltip(event, d);
 				onItemHover(d);
 			})
@@ -265,7 +277,7 @@
 					d3.select(this)
 						.attr('r', 5)
 						.attr('fill', color === 'transparent' ? 'none' : color)
-						.attr('stroke', color === 'transparent' ? '#6b7280' : '#fff');
+						.attr('stroke', color === 'transparent' ? '#6b6b6b' : '#faf7f2'); // charcoal-lighter : parchment-100
 				}
 				hideTooltip();
 				onItemHover(null);
@@ -292,10 +304,10 @@
 			
 			// Set content first to measure tooltip dimensions
 			tooltip.innerHTML = `
-				<div class="font-semibold">${item.name}</div>
-				<div class="text-sm text-gray-600">Cost: $${item.cost}</div>
-				<div class="text-sm text-gray-600">Score: ${item.score.toFixed(1)}</div>
-				<div class="text-xs text-gray-500 mt-1">Click to view details below</div>
+				<div class="font-semibold text-ink-900">${item.name}</div>
+				<div class="text-sm text-charcoal-light">Cost: $${item.cost}</div>
+				<div class="text-sm text-charcoal-light">Score: ${item.score.toFixed(1)}</div>
+				<div class="text-xs text-charcoal-lighter mt-1">Click to view details below</div>
 			`;
 			
 			// Check if tooltip would overflow the right edge
@@ -369,8 +381,8 @@
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
-		<h2 class="text-2xl font-bold">Nerd Out</h2>
-		<div class="text-sm text-gray-600">
+		<h2 class="text-2xl font-bold font-serif text-ink-900 tracking-wide">Nerd Out</h2>
+		<div class="text-sm text-charcoal-light">
 			{plotData?.length || 0} pens • Interactive plot and list
 		</div>
 	</div>
@@ -379,69 +391,69 @@
 	<div class="grid gap-6 lg:grid-cols-3">
 		<div class="relative lg:col-span-2">
 			<div bind:this={containerElement} class="w-full">
-				<svg 
+				<svg
 					bind:this={svgElement}
-					width={svgWidth} 
+					width={svgWidth}
 					height={svgHeight}
 					viewBox="0 0 {svgWidth} {svgHeight}"
-					class="border border-gray-300 rounded w-full h-auto max-w-full"
+					class="border-2 border-ink-200 rounded-lg w-full h-auto max-w-full bg-parchment-50"
 					style="overflow: visible;"
 				></svg>
 			</div>
 			
-			<div 
+			<div
 				bind:this={tooltip}
-				class="absolute pointer-events-none opacity-0 bg-white border border-gray-300 rounded shadow-lg p-3 text-sm transition-opacity duration-200 z-50 max-w-xs"
+				class="absolute pointer-events-none opacity-0 bg-parchment-50 border-2 border-brass-500 rounded-lg shadow-lg p-3 text-sm transition-opacity duration-200 z-50 max-w-xs"
 				style="display: none;"
 			></div>
 		</div>
 
-		<div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm h-full">
+		<div class="bg-parchment-50 border-2 border-ink-200 rounded-lg p-4 shadow-sm h-full">
 			<div class="flex items-center justify-between">
-				<h3 class="text-lg font-semibold">Selected Fountain Pen</h3>
+				<h3 class="text-lg font-semibold font-serif text-ink-900">Selected Fountain Pen</h3>
 				{#if selectedItem}
-					<span class="text-sm text-gray-600 font-medium">
+					<span class="text-sm text-charcoal-light font-medium">
 						Score {selectedItem.score.toFixed(1)}
 					</span>
 				{/if}
 			</div>
 
 			{#if selectedItem}
-				<div class="mt-3 flex flex-col gap-4 text-sm text-gray-700">
+				<div class="mt-3 flex flex-col gap-4 text-sm text-charcoal">
 					<div>
-						<div class="text-xl font-bold text-gray-900">{selectedItem.name}</div>
-						<div class="text-sm text-gray-500 mt-1">
+						<div class="text-xl font-bold font-serif text-ink-900">{selectedItem.name}</div>
+						<div class="text-sm text-charcoal-lighter mt-1">
 							Cost ${selectedItem.cost} • {selectedItem.specs.nib_material?.replace(/_/g, ' ') || 'Nib material unknown'}
 						</div>
 					</div>
 
 					{#if selectedItem.description}
-						<p class="text-gray-600">{selectedItem.description}</p>
+						<p class="text-charcoal-light">{selectedItem.description}</p>
 					{/if}
 
 					<div class="grid grid-cols-2 gap-3">
-						<div class="rounded border border-gray-200 p-2 bg-gray-50">
-							<div class="text-xs uppercase text-gray-500">Cost</div>
-							<div class="text-lg font-semibold text-gray-900">${selectedItem.cost}</div>
+						<div class="rounded-lg border-2 border-ink-100 p-2 bg-parchment-100">
+							<div class="text-xs uppercase text-charcoal-lighter">Cost</div>
+							<div class="text-lg font-semibold text-ink-900">${selectedItem.cost}</div>
 						</div>
-						<div class="rounded border border-gray-200 p-2 bg-gray-50">
-							<div class="text-xs uppercase text-gray-500">Score</div>
-							<div class="text-lg font-semibold text-gray-900">{selectedItem.score.toFixed(1)}</div>
+						<div class="rounded-lg border-2 border-ink-100 p-2 bg-parchment-100">
+							<div class="text-xs uppercase text-charcoal-lighter">Score</div>
+							<div class="text-lg font-semibold text-ink-900">{selectedItem.score.toFixed(1)}</div>
 						</div>
 					</div>
 
 					<div>
-						<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+						<h4 class="text-xs font-semibold text-charcoal-lighter uppercase tracking-wide mb-2">
 							Key specs
 						</h4>
 						{#if selectedItemSpecs.length === 0}
-							<p class="text-gray-500 text-sm">No specs available for this pen.</p>
+							<p class="text-charcoal-lighter text-sm">No specs available for this pen.</p>
 						{:else}
 							<div class="space-y-1 text-sm">
 								{#each selectedItemSpecs as [key, value]}
 									<div class="flex justify-between gap-3">
-										<span class="text-gray-500 capitalize">{key.replace(/_/g, ' ')}</span>
-										<span class="font-medium text-gray-900 text-right">{formatSpecValue(value)}</span>
+										<span class="text-charcoal-lighter capitalize">{key.replace(/_/g, ' ')}</span>
+										<span class="font-medium text-charcoal text-right">{formatSpecValue(value)}</span>
 									</div>
 								{/each}
 							</div>
@@ -449,18 +461,18 @@
 					</div>
 
 					{#if selectedItem.url}
-						<a 
-							href={selectedItem.url} 
-							target="_blank" 
+						<a
+							href={selectedItem.url}
+							target="_blank"
 							rel="noopener noreferrer"
-							class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+							class="inline-flex items-center text-sm text-ink-700 hover:text-brass-600 transition-colors"
 						>
 							View product page →
 						</a>
 					{/if}
 				</div>
 			{:else}
-				<p class="text-sm text-gray-600 mt-3">
+				<p class="text-sm text-charcoal-light mt-3">
 					Click any dot in the plot or a pen in the list to spotlight its specs here without scrolling the full catalog.
 				</p>
 			{/if}
@@ -472,13 +484,13 @@
 		<div class="mt-8">
 				<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 					<div>
-						<h3 class="text-lg font-semibold">Search Fountain Pens</h3>
+						<h3 class="text-lg font-semibold font-serif text-ink-900">Search Fountain Pens</h3>
 						{#if normalizedListSearch}
-							<p class="text-sm text-gray-500">
+							<p class="text-sm text-charcoal-lighter">
 								{visibleListItems.length} match{visibleListItems.length === 1 ? '' : 'es'} for "{listSearchTerm}"
 							</p>
 						{:else}
-							<p class="text-sm text-gray-500">
+							<p class="text-sm text-charcoal-lighter">
 								Enter a quick find query to reveal pens from the full catalog.
 							</p>
 						{/if}
@@ -487,7 +499,7 @@
 				<div class="w-full sm:w-80">
 					<label
 						for={QUICK_FIND_INPUT_ID}
-						class="block text-xs uppercase tracking-wide text-gray-500 mb-1"
+						class="block text-xs uppercase tracking-wide text-charcoal-lighter mb-1"
 					>
 						Quick find
 					</label>
@@ -496,34 +508,34 @@
 						type="text"
 						placeholder="Start typing a pen name, nib, or spec..."
 						bind:value={listSearchTerm}
-						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+						class="w-full px-3 py-2 border-2 border-ink-200 rounded-md focus:ring-2 focus:ring-brass-500 focus:border-brass-600 text-sm bg-parchment-50"
 					/>
 				</div>
 			</div>
 
 			{#if !normalizedListSearch}
-				<div class="mt-4 border border-dashed border-gray-300 rounded-lg bg-white p-4 shadow-sm">
+				<div class="mt-4 border-2 border-dashed border-ink-200 rounded-lg bg-parchment-50 p-4 shadow-sm">
 					<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 						<div>
-							<p class="font-semibold text-gray-900">
+							<p class="font-semibold text-ink-900">
 								Start typing to explore the catalog
 							</p>
-							<p class="text-sm text-gray-600">
+							<p class="text-sm text-charcoal-light">
 								Use the quick find input above to filter hundreds of pens by name, nib material, filling system, or any other spec.
 							</p>
 						</div>
-						<div class="text-3xl sm:text-4xl text-blue-500 sm:self-start" aria-hidden="true">↑</div>
+						<div class="text-3xl sm:text-4xl text-brass-600 sm:self-start" aria-hidden="true">↑</div>
 					</div>
 					<button
 						on:click={focusQuickFindInput}
 						type="button"
-						class="mt-4 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+						class="mt-4 inline-flex items-center text-sm text-ink-700 hover:text-brass-600 transition-colors"
 					>
 						Jump to quick find field
 					</button>
 				</div>
 			{:else if visibleListItems.length === 0}
-				<p class="mt-4 text-sm text-gray-600">
+				<p class="mt-4 text-sm text-charcoal-light">
 					No pens match "{listSearchTerm}". Try a different name, nib material, or spec keyword.
 				</p>
 			{:else}
@@ -531,13 +543,13 @@
 				{#each visibleListItems as item (item.id)}
 				{@const isHighlighted = highlightedItem === item.id}
 				{@const isExpanded = expandedItems.has(item.id)}
-				<div 
+				<div
 					id="pen-{item.id}"
-					class="border border-gray-200 rounded-lg transition-all duration-300 {isHighlighted ? 'ring-2 ring-blue-500 bg-blue-50' : ''} {isExpanded ? 'shadow-lg' : 'shadow-sm'}"
+					class="border-2 border-ink-200 rounded-lg transition-all duration-300 bg-parchment-50 {isHighlighted ? 'ring-2 ring-brass-500 bg-brass-50' : ''} {isExpanded ? 'shadow-lg' : 'shadow-sm'}"
 				>
 					<!-- Main pen info - clickable to expand -->
-					<div 
-						class="p-4 cursor-pointer hover:bg-gray-50"
+					<div
+						class="p-4 cursor-pointer hover:bg-parchment-100 transition-colors"
 						role="button"
 						tabindex="0"
 						on:mouseenter={() => onItemHover(item)}
@@ -547,12 +559,12 @@
 					>
 						<div class="flex items-center justify-between">
 							<div class="flex-1">
-								<div class="font-semibold text-lg">{item.name}</div>
-								<div class="text-sm text-gray-600 mt-1">
+								<div class="font-semibold font-serif text-lg text-ink-900">{item.name}</div>
+								<div class="text-sm text-charcoal-light mt-1">
 									Score: {item.score.toFixed(1)} • Cost: ${item.cost}
 								</div>
 								{#if item.description}
-									<div class="text-sm text-gray-500 mt-1">{item.description}</div>
+									<div class="text-sm text-charcoal-lighter mt-1">{item.description}</div>
 								{/if}
 							</div>
 							
@@ -569,19 +581,19 @@
 							<!-- Expand/External Link Icons -->
 							<div class="flex items-center ml-2 space-x-2">
 								<!-- Expand Arrow -->
-								<svg 
-									class="w-5 h-5 text-gray-400 transform transition-transform duration-300 ease-out {isExpanded ? 'rotate-180' : ''}"
-									fill="currentColor" 
+								<svg
+									class="w-5 h-5 text-charcoal-lighter transform transition-transform duration-300 ease-out {isExpanded ? 'rotate-180' : ''}"
+									fill="currentColor"
 									viewBox="0 0 20 20"
 								>
 									<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
 								</svg>
-								
+
 								<!-- External Link Icon -->
 								{#if item.url}
 									<button
 										on:click|stopPropagation={() => window.open(item.url, '_blank')}
-										class="text-gray-400 hover:text-blue-600 transition-colors"
+										class="text-charcoal-lighter hover:text-brass-600 transition-colors"
 										title="Open product page in new tab"
 									>
 										<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">

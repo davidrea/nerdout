@@ -8,8 +8,8 @@
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
-		<h2 class="text-2xl font-bold">Nerd Way Way Out</h2>
-		<div class="text-sm text-gray-600">
+		<h2 class="text-2xl font-bold font-serif text-ink-900 tracking-wide">Nerd Way Way Out</h2>
+		<div class="text-sm text-charcoal-light">
 			{criteria.length} criteria • Adjust relative importance using pairwise comparisons
 		</div>
 	</div>
@@ -17,10 +17,10 @@
 	<!-- Criteria comparison matrix -->
 	{#if criteria.length > 1}
 		<div>
-			<h3 class="text-lg font-semibold mb-4">Criteria Weight Matrix</h3>
-			<p class="text-sm text-gray-600 mb-4">Compare criteria pairwise to determine their relative weights. The matrix reflects typical fountain pen enthusiast preferences.</p>
-			<CriteriaMatrix 
-				{criteria} 
+			<h3 class="text-lg font-semibold font-serif text-ink-900 mb-4">Criteria Weight Matrix</h3>
+			<p class="text-sm text-charcoal-light mb-4">Compare criteria pairwise to determine their relative weights. The matrix reflects typical fountain pen enthusiast preferences.</p>
+			<CriteriaMatrix
+				{criteria}
 				{onCriteriaUpdate}
 			/>
 		</div>

@@ -209,19 +209,19 @@
 	}
 
 	function getCellColor(rowId: string, colId: string, rowIdx: number, colIdx: number): string {
-		if (rowId === colId) return 'bg-gray-200';
-		
+		if (rowId === colId) return 'bg-parchment-200';
+
 		// Non-clickable cells (lower triangle) get gray background
 		if (!isClickable(rowIdx, colIdx)) {
-			return 'bg-gray-300';
+			return 'bg-ink-100';
 		}
-		
+
 		const comparison = comparisonMatrix[rowId]?.[colId];
 		switch (comparison) {
-			case 'up': return 'bg-blue-100 hover:bg-blue-200';
-			case 'left': return 'bg-green-100 hover:bg-green-200';
-			case 'equal': return 'bg-yellow-100 hover:bg-yellow-200';
-			default: return 'bg-gray-100 hover:bg-gray-200';
+			case 'up': return 'bg-ink-100 hover:bg-ink-200';
+			case 'left': return 'bg-brass-100 hover:bg-brass-200';
+			case 'equal': return 'bg-parchment-200 hover:bg-parchment-300';
+			default: return 'bg-parchment-100 hover:bg-parchment-200';
 		}
 	}
 
@@ -236,19 +236,19 @@
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
-		<h2 class="text-2xl font-bold">Criteria Comparison Matrix</h2>
-		<div class="text-sm text-gray-600">
+		<h2 class="text-2xl font-bold font-serif text-ink-900">Criteria Comparison Matrix</h2>
+		<div class="text-sm text-charcoal-light">
 			Click cells to compare criteria importance
 		</div>
 	</div>
 
-	<div class="bg-white rounded-lg border border-gray-200 p-4">
-		<p class="text-sm text-gray-600 mb-4">
-			Compare each pair of criteria. Click the upper-right cells to cycle through: 
+	<div class="bg-parchment-50 rounded-lg border-2 border-ink-200 p-4">
+		<p class="text-sm text-charcoal-light mb-4">
+			Compare each pair of criteria. Click the upper-right cells to cycle through:
 			<span class="inline-flex items-center space-x-1">
-				<span class="px-2 py-1 bg-blue-100 rounded text-xs">↑ Column higher priority</span>
-				<span class="px-2 py-1 bg-green-100 rounded text-xs">← Row higher priority</span>
-				<span class="px-2 py-1 bg-yellow-100 rounded text-xs">= Equal priority</span>
+				<span class="px-2 py-1 bg-ink-100 rounded text-xs">↑ Column higher priority</span>
+				<span class="px-2 py-1 bg-brass-100 rounded text-xs">← Row higher priority</span>
+				<span class="px-2 py-1 bg-parchment-200 rounded text-xs">= Equal priority</span>
 			</span>
 		</p>
 
@@ -258,7 +258,7 @@
 					<tr>
 						<th class="w-32"></th>
 						{#each criteria as criterion}
-							<th class="w-20 p-2 text-xs font-medium text-center border border-gray-300 bg-gray-50">
+							<th class="w-20 p-2 text-xs font-medium text-center border-2 border-ink-200 bg-parchment-100 text-charcoal">
 								<div class="leading-tight">
 									{criterion.name}
 								</div>
@@ -269,21 +269,21 @@
 				<tbody>
 					{#each criteria as rowCriterion, rowIdx}
 						<tr>
-							<td class="p-2 text-sm font-medium border border-gray-300 bg-gray-50 text-right pr-3">
+							<td class="p-2 text-sm font-medium border-2 border-ink-200 bg-parchment-100 text-right pr-3 text-charcoal">
 								{rowCriterion.name}
 							</td>
 							{#each criteria as colCriterion, colIdx}
-								<td class="w-20 h-16 border border-gray-300 p-0">
+								<td class="w-20 h-16 border-2 border-ink-200 p-0">
 									{#if isClickable(rowIdx, colIdx)}
 										<button
 											on:click={() => toggleComparison(rowCriterion.id, colCriterion.id)}
-											class="w-full h-full flex items-center justify-center text-lg font-bold cursor-pointer {getCellColor(rowCriterion.id, colCriterion.id, rowIdx, colIdx)} transition-colors"
+											class="w-full h-full flex items-center justify-center text-lg font-bold cursor-pointer {getCellColor(rowCriterion.id, colCriterion.id, rowIdx, colIdx)} transition-colors text-charcoal"
 											title="Click to cycle: {rowCriterion.name} vs {colCriterion.name}"
 										>
 											{getCellIcon(rowCriterion.id, colCriterion.id)}
 										</button>
 									{:else}
-										<div class="w-full h-full flex items-center justify-center text-lg font-bold {getCellColor(rowCriterion.id, colCriterion.id, rowIdx, colIdx)}">
+										<div class="w-full h-full flex items-center justify-center text-lg font-bold {getCellColor(rowCriterion.id, colCriterion.id, rowIdx, colIdx)} text-charcoal-light">
 											{getCellIcon(rowCriterion.id, colCriterion.id)}
 										</div>
 									{/if}

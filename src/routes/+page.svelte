@@ -133,38 +133,38 @@
 	<meta name="description" content="Visualize and compare fountain pens across multiple criteria" />
 </svelte:head>
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-parchment-100">
 	<!-- Header -->
-	<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+	<header class="bg-parchment-50 shadow-sm border-b-2 border-brass-600 sticky top-0 z-50">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 			<div class="flex items-center justify-between h-16">
 				<div>
-					<h1 class="text-2xl font-bold text-gray-900">Nerdout</h1>
-					<p class="text-sm text-gray-600">Fountain Pen Comparison Tool</p>
+					<h1 class="text-2xl font-bold font-serif text-ink-900 tracking-wide">Nerdout</h1>
+					<p class="text-sm text-charcoal-light">Fountain Pen Comparison Tool</p>
 				</div>
-				
+
 				<nav class="flex space-x-4">
 					<button
 						on:click={() => scrollToSection('nerdout')}
-						class="px-3 py-2 text-sm font-medium rounded-md {currentSection === 'nerdout' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900'}"
+						class="px-3 py-2 text-sm font-medium rounded-md transition-colors {currentSection === 'nerdout' ? 'bg-ink-100 text-ink-800' : 'text-charcoal-light hover:text-ink-900 hover:bg-parchment-200'}"
 					>
 						Nerd Out
 					</button>
 					<button
 						on:click={() => scrollToSection('nerdwayout')}
-						class="px-3 py-2 text-sm font-medium rounded-md {currentSection === 'nerdwayout' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900'}"
+						class="px-3 py-2 text-sm font-medium rounded-md transition-colors {currentSection === 'nerdwayout' ? 'bg-ink-100 text-ink-800' : 'text-charcoal-light hover:text-ink-900 hover:bg-parchment-200'}"
 					>
 						Nerd Way Out
 					</button>
 					<button
 						on:click={() => scrollToSection('nerdwaywayout')}
-						class="px-3 py-2 text-sm font-medium rounded-md {currentSection === 'nerdwaywayout' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900'}"
+						class="px-3 py-2 text-sm font-medium rounded-md transition-colors {currentSection === 'nerdwaywayout' ? 'bg-ink-100 text-ink-800' : 'text-charcoal-light hover:text-ink-900 hover:bg-parchment-200'}"
 					>
 						Nerd Way Way Out
 					</button>
 				</nav>
 
-				<div class="text-sm text-gray-600">
+				<div class="text-sm text-charcoal-light">
 					{filteredItems.length} of {items.length} items
 				</div>
 			</div>
@@ -174,11 +174,11 @@
 	<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 		<!-- Introduction -->
 		<div class="mb-8 text-center">
-			<h2 class="text-3xl font-bold text-gray-900 mb-4">
+			<h2 class="text-3xl font-bold font-serif text-ink-900 mb-4 tracking-wide">
 				Find Your Perfect Fountain Pen
 			</h2>
-			<p class="text-lg text-gray-600 max-w-3xl mx-auto">
-				Compare fountain pens across multiple criteria including build quality, writing experience, 
+			<p class="text-lg text-charcoal-light max-w-3xl mx-auto">
+				Compare fountain pens across multiple criteria including build quality, writing experience,
 				and value. Adjust the importance of different factors to find the pen that's perfect for you.
 			</p>
 		</div>
@@ -227,15 +227,15 @@
 	</main>
 
 	<!-- Footer -->
-	<footer class="bg-white border-t border-gray-200 mt-16">
+	<footer class="bg-parchment-50 border-t-2 border-brass-600 mt-16">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-			<div class="text-center text-gray-600">
+			<div class="text-center text-charcoal-light">
 				<p class="mb-2">
 					Nerdout - A criteria-based comparison tool inspired by 99spokes
 				</p>
 				<p class="text-sm">
-					Built with SvelteKit and D3.js • 
-					<a href="https://github.com" class="text-blue-600 hover:text-blue-800">View Source</a>
+					Built with SvelteKit and D3.js •
+					<a href="https://github.com" class="text-ink-700 hover:text-brass-600 transition-colors">View Source</a>
 				</p>
 			</div>
 		</div>

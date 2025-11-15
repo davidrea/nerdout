@@ -120,16 +120,16 @@
 	$: isPriceRangeActive = selectedPriceMin > priceMin || selectedPriceMax < priceMax;
 </script>
 
-<div class="bg-gray-50 border border-gray-300 rounded-lg">
+<div class="bg-parchment-50 border-2 border-ink-200 rounded-lg">
 	<!-- Collapsible header -->
-	<div class="p-4 flex items-center justify-between hover:bg-gray-100 rounded-t-lg">
+	<div class="p-4 flex items-center justify-between hover:bg-parchment-100 rounded-t-lg transition-colors">
 		<button
 			on:click={() => isExpanded = !isExpanded}
 			class="flex-1 flex items-center space-x-2 text-left"
 		>
-			<h3 class="text-lg font-semibold">Filter & Search</h3>
+			<h3 class="text-lg font-semibold font-serif text-ink-900">Filter & Search</h3>
 			{#if filters.length > 0 || searchTerm || isPriceRangeActive}
-				<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+				<span class="px-2 py-1 bg-brass-100 text-brass-900 text-xs rounded-full font-medium">
 					{filters.length + (searchTerm ? 1 : 0) + (isPriceRangeActive ? 1 : 0)} active
 				</span>
 			{/if}
@@ -138,7 +138,7 @@
 			{#if filters.length > 0 || searchTerm || isPriceRangeActive}
 				<button
 					on:click={clearAllFilters}
-					class="text-sm text-red-600 hover:text-red-800 px-2 py-1 rounded"
+					class="text-sm text-burgundy-700 hover:text-burgundy-900 px-2 py-1 rounded transition-colors"
 				>
 					Clear All
 				</button>
@@ -148,9 +148,9 @@
 				class="p-1"
 				aria-label={isExpanded ? "Collapse filters" : "Expand filters"}
 			>
-				<svg 
-					class="w-5 h-5 text-gray-500 transform transition-transform {isExpanded ? 'rotate-180' : ''}"
-					fill="currentColor" 
+				<svg
+					class="w-5 h-5 text-charcoal-lighter transform transition-transform {isExpanded ? 'rotate-180' : ''}"
+					fill="currentColor"
 					viewBox="0 0 20 20"
 				>
 					<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
@@ -165,7 +165,7 @@
 
 	<!-- Search -->
 	<div>
-		<label class="block text-sm font-medium text-gray-700 mb-2">
+		<label class="block text-sm font-medium text-charcoal mb-2">
 			Search Items
 		</label>
 		<input
@@ -173,7 +173,7 @@
 			placeholder="Search by name, description, or attributes..."
 			value={searchTerm}
 			on:input={onSearchInput}
-			class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+			class="w-full px-3 py-2 border-2 border-ink-200 rounded-md focus:ring-2 focus:ring-brass-500 focus:border-brass-600 bg-parchment-50"
 		/>
 	</div>
 
@@ -193,12 +193,12 @@
 	<!-- Filters -->
 	<div>
 		<div class="flex items-center justify-between mb-2">
-			<label class="block text-sm font-medium text-gray-700">
+			<label class="block text-sm font-medium text-charcoal">
 				Filters
 			</label>
 			<button
 				on:click={addFilter}
-				class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+				class="text-sm bg-ink-700 text-parchment-50 px-3 py-1 rounded hover:bg-brass-600 transition-colors"
 				disabled={availableAttributes.size === 0}
 			>
 				+ Add Filter
@@ -206,16 +206,16 @@
 		</div>
 
 		{#if filters.length === 0}
-			<p class="text-sm text-gray-500 italic">No filters applied</p>
+			<p class="text-sm text-charcoal-lighter italic">No filters applied</p>
 		{:else}
 			<div class="space-y-3">
 				{#each filters as filter, index}
-					<div class="flex items-center space-x-2 p-3 bg-white border border-gray-200 rounded">
+					<div class="flex items-center space-x-2 p-3 bg-parchment-100 border-2 border-ink-100 rounded-lg">
 						<!-- Attribute selector -->
 						<select
 							value={filter.attribute}
 							on:change={(e) => updateFilter(index, { attribute: e.currentTarget.value, value: '' })}
-							class="px-2 py-1 border border-gray-300 rounded text-sm"
+							class="px-2 py-1 border-2 border-ink-200 rounded text-sm bg-parchment-50"
 						>
 							{#each Array.from(availableAttributes) as attr}
 								<option value={attr}>{attr.replace(/_/g, ' ')}</option>
@@ -226,7 +226,7 @@
 						<select
 							value={filter.operator}
 							on:change={(e) => updateFilter(index, { operator: e.currentTarget.value as FilterRule['operator'], value: '' })}
-							class="px-2 py-1 border border-gray-300 rounded text-sm"
+							class="px-2 py-1 border-2 border-ink-200 rounded text-sm bg-parchment-50"
 						>
 							{#each getAvailableOperators(filter.attribute) as operator}
 								<option value={operator}>{getOperatorLabel(operator)}</option>
@@ -242,7 +242,7 @@
 									const selected = Array.from(e.currentTarget.selectedOptions).map(o => o.value);
 									updateFilter(index, { value: selected });
 								}}
-								class="px-2 py-1 border border-gray-300 rounded text-sm min-w-32"
+								class="px-2 py-1 border-2 border-ink-200 rounded text-sm min-w-32 bg-parchment-50"
 								size="3"
 							>
 								{#each getAttributeValueOptions(filter.attribute) as option}
@@ -253,7 +253,7 @@
 							<select
 								value={filter.value}
 								on:change={(e) => updateFilter(index, { value: e.currentTarget.value })}
-								class="px-2 py-1 border border-gray-300 rounded text-sm"
+								class="px-2 py-1 border-2 border-ink-200 rounded text-sm bg-parchment-50"
 							>
 								<option value="">Select value...</option>
 								{#each getAttributeValueOptions(filter.attribute) as option}
@@ -266,7 +266,7 @@
 								value={filter.value}
 								on:input={(e) => updateFilter(index, { value: parseFloat(e.currentTarget.value) || 0 })}
 								placeholder="Enter number..."
-								class="px-2 py-1 border border-gray-300 rounded text-sm w-32"
+								class="px-2 py-1 border-2 border-ink-200 rounded text-sm w-32 bg-parchment-50"
 							/>
 						{:else}
 							<input
@@ -274,14 +274,14 @@
 								value={filter.value}
 								on:input={(e) => updateFilter(index, { value: e.currentTarget.value })}
 								placeholder="Enter value..."
-								class="px-2 py-1 border border-gray-300 rounded text-sm"
+								class="px-2 py-1 border-2 border-ink-200 rounded text-sm bg-parchment-50"
 							/>
 						{/if}
 
 						<!-- Remove filter -->
 						<button
 							on:click={() => removeFilter(index)}
-							class="p-1 text-red-600 hover:bg-red-100 rounded"
+							class="p-1 text-burgundy-600 hover:bg-burgundy-100 rounded transition-colors"
 							title="Remove filter"
 						>
 							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -297,7 +297,7 @@
 	<!-- Quick filters for common attributes -->
 	{#if availableAttributes.size > 0}
 		<div>
-			<label class="block text-sm font-medium text-gray-700 mb-2">
+			<label class="block text-sm font-medium text-charcoal mb-2">
 				Quick Filters
 			</label>
 			<div class="flex flex-wrap gap-2">
@@ -315,7 +315,7 @@
 									dispatch('filtersChange', [...filters, newFilter]);
 								}
 							}}
-							class="px-2 py-1 text-xs rounded border {isActive ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}"
+							class="px-2 py-1 text-xs rounded-md border-2 transition-colors {isActive ? 'bg-brass-600 text-parchment-50 border-brass-600' : 'bg-parchment-50 text-charcoal border-ink-200 hover:bg-parchment-100'}"
 						>
 							{attribute.replace(/_/g, ' ')}: {value}
 						</button>

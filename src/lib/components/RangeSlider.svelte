@@ -64,21 +64,21 @@
 
 <div class="range-slider-container">
 	<div class="flex items-center justify-between mb-2">
-		<label class="block text-sm font-medium text-gray-700">
+		<label class="block text-sm font-medium text-charcoal">
 			{label}
 		</label>
-		<div class="text-sm text-gray-600">
+		<div class="text-sm text-charcoal-light">
 			${minValue.toFixed(0)} - ${maxValue.toFixed(0)}
 		</div>
 	</div>
 
 	<div class="relative" bind:this={sliderElement}>
 		<!-- Track background -->
-		<div class="h-2 bg-gray-200 rounded-full absolute w-full top-3"></div>
+		<div class="h-2 bg-ink-100 rounded-full absolute w-full top-3"></div>
 
 		<!-- Active track (between thumbs) -->
 		<div
-			class="h-2 bg-blue-600 rounded-full absolute top-3"
+			class="h-2 bg-brass-600 rounded-full absolute top-3"
 			style="left: {minPercent}%; right: {100 - maxPercent}%"
 		></div>
 
@@ -120,7 +120,7 @@
 	<!-- Optional: Manual input fields -->
 	<div class="grid grid-cols-2 gap-3 mt-4">
 		<div>
-			<label class="block text-xs text-gray-600 mb-1">Min</label>
+			<label class="block text-xs text-charcoal-light mb-1">Min</label>
 			<input
 				type="number"
 				{min}
@@ -134,11 +134,11 @@
 						dispatch('change', { min: minValue, max: maxValue });
 					}
 				}}
-				class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+				class="w-full px-2 py-1 border-2 border-ink-200 rounded text-sm bg-parchment-50"
 			/>
 		</div>
 		<div>
-			<label class="block text-xs text-gray-600 mb-1">Max</label>
+			<label class="block text-xs text-charcoal-light mb-1">Max</label>
 			<input
 				type="number"
 				{min}
@@ -152,7 +152,7 @@
 						dispatch('change', { min: minValue, max: maxValue });
 					}
 				}}
-				class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+				class="w-full px-2 py-1 border-2 border-ink-200 rounded text-sm bg-parchment-50"
 			/>
 		</div>
 	</div>
@@ -184,8 +184,8 @@
 		width: 1.25rem;
 		height: 1.25rem;
 		border-radius: 50%;
-		background: white;
-		border: 2px solid #3b82f6;
+		background: #faf7f2;
+		border: 2px solid #b8860b;
 		cursor: pointer;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 		transition: all 0.15s ease-in-out;
@@ -193,13 +193,13 @@
 
 	.range-input::-webkit-slider-thumb:hover {
 		border-width: 3px;
-		box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+		box-shadow: 0 2px 6px rgba(184, 134, 11, 0.4);
 	}
 
 	.range-input::-webkit-slider-thumb:active {
 		border-width: 3px;
-		background: #3b82f6;
-		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.6);
+		background: #b8860b;
+		box-shadow: 0 2px 8px rgba(184, 134, 11, 0.6);
 	}
 
 	/* Firefox */
@@ -208,8 +208,8 @@
 		width: 1.25rem;
 		height: 1.25rem;
 		border-radius: 50%;
-		background: white;
-		border: 2px solid #3b82f6;
+		background: #faf7f2;
+		border: 2px solid #b8860b;
 		cursor: pointer;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 		transition: all 0.15s ease-in-out;
@@ -217,13 +217,13 @@
 
 	.range-input::-moz-range-thumb:hover {
 		border-width: 3px;
-		box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+		box-shadow: 0 2px 6px rgba(184, 134, 11, 0.4);
 	}
 
 	.range-input::-moz-range-thumb:active {
 		border-width: 3px;
-		background: #3b82f6;
-		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.6);
+		background: #b8860b;
+		box-shadow: 0 2px 8px rgba(184, 134, 11, 0.6);
 	}
 
 	/* Remove track styling */
