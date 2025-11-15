@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Item, FilterRule } from '../types';
+	import RangeSlider from './RangeSlider.svelte';
 
 	export let items: Item[] = [];
 	export let filters: FilterRule[] = [];
 	export let searchTerm: string = '';
+	export let priceMin: number = 0;
+	export let priceMax: number = 10000;
+	export let selectedPriceMin: number = 0;
+	export let selectedPriceMax: number = 10000;
 
 	const dispatch = createEventDispatcher();
 
@@ -60,6 +65,11 @@
 	function clearAllFilters() {
 		dispatch('filtersChange', []);
 		dispatch('searchChange', '');
+		dispatch('priceRangeChange', { min: priceMin, max: priceMax });
+	}
+
+	function handlePriceRangeChange(event: CustomEvent<{ min: number, max: number }>) {
+		dispatch('priceRangeChange', event.detail);
 	}
 
 	function onSearchInput(event: Event) {
@@ -93,18 +103,21 @@
 		if (isArrayAttribute(attribute)) {
 			return ['has', 'has_any'];
 		}
-		
+
 		// Check if numeric
-		const isNumeric = Array.from(attributeValues[attribute] || []).every(v => 
+		const isNumeric = Array.from(attributeValues[attribute] || []).every(v =>
 			typeof v === 'number' || !isNaN(Number(v))
 		);
-		
+
 		if (isNumeric) {
 			return ['equals', 'greater', 'less'];
 		}
-		
+
 		return ['equals', 'contains', 'in'];
 	}
+
+	// Check if price range filter is active
+	$: isPriceRangeActive = selectedPriceMin > priceMin || selectedPriceMax < priceMax;
 </script>
 
 <div class="bg-gray-50 border border-gray-300 rounded-lg">
@@ -115,14 +128,14 @@
 			class="flex-1 flex items-center space-x-2 text-left"
 		>
 			<h3 class="text-lg font-semibold">Filter & Search</h3>
-			{#if filters.length > 0 || searchTerm}
+			{#if filters.length > 0 || searchTerm || isPriceRangeActive}
 				<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-					{filters.length + (searchTerm ? 1 : 0)} active
+					{filters.length + (searchTerm ? 1 : 0) + (isPriceRangeActive ? 1 : 0)} active
 				</span>
 			{/if}
 		</button>
 		<div class="flex items-center space-x-2">
-			{#if filters.length > 0 || searchTerm}
+			{#if filters.length > 0 || searchTerm || isPriceRangeActive}
 				<button
 					on:click={clearAllFilters}
 					class="text-sm text-red-600 hover:text-red-800 px-2 py-1 rounded"
@@ -161,6 +174,19 @@
 			value={searchTerm}
 			on:input={onSearchInput}
 			class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+		/>
+	</div>
+
+	<!-- Price Range Filter -->
+	<div>
+		<RangeSlider
+			label="Price Range"
+			min={priceMin}
+			max={priceMax}
+			minValue={selectedPriceMin}
+			maxValue={selectedPriceMax}
+			step={1}
+			on:change={handlePriceRangeChange}
 		/>
 	</div>
 
