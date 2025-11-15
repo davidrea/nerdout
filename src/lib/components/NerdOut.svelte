@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 	import * as d3 from 'd3';
 	import type { Item, Criterion } from '../types';
 	import { calculateItemScore } from '../scoring';
@@ -37,13 +39,20 @@
 	}));
 
 	function getNibMaterialColor(nibMaterial: string): string {
-		switch (nibMaterial) {
-			case 'steel': return '#9ca3af'; // light gray
-			case 'titanium': return '#4b5563'; // dark gray  
-			case '14k gold':
-			case '18k gold':
-			case 'gold': return '#fbbf24'; // gold
-			default: return '#6b7280'; // default gray
+		if (!nibMaterial) return 'transparent'; // Empty/outlined for unknown
+		
+		const material = nibMaterial.toLowerCase();
+		
+		if (material.includes('steel')) {
+			return '#9ca3af'; // light gray
+		} else if (material.includes('titanium')) {
+			return '#4b5563'; // dark gray  
+		} else if (material.includes('gold')) {
+			return '#fbbf24'; // gold (covers 14k, 18k, 21k, etc.)
+		} else if (material.includes('palladium')) {
+			return '#d1d5db'; // lighter gray for palladium
+		} else {
+			return 'transparent'; // Empty/outlined for unmatched materials
 		}
 	}
 
@@ -62,7 +71,16 @@
 		const svg = d3.select(svgElement);
 		svg.selectAll('.point')
 			.attr('r', (d: any) => d.id === highlightedItem ? 8 : 5)
-			.attr('fill', (d: any) => d.id === highlightedItem ? '#3b82f6' : getNibMaterialColor(d.specs.nib_material));
+			.attr('fill', (d: any) => {
+				if (d.id === highlightedItem) return '#3b82f6';
+				const color = getNibMaterialColor(d.specs.nib_material);
+				return color === 'transparent' ? 'none' : color;
+			})
+			.attr('stroke', (d: any) => {
+				if (d.id === highlightedItem) return '#fff';
+				const color = getNibMaterialColor(d.specs.nib_material);
+				return color === 'transparent' ? '#6b7280' : '#fff';
+			});
 	}
 
 	function renderPlot() {
@@ -128,9 +146,11 @@
 			.attr('transform', `translate(${width - 120}, ${height - 80})`);
 
 		const nibMaterials = [
-			{ material: 'steel', label: 'Steel', color: getNibMaterialColor('steel') },
-			{ material: 'titanium', label: 'Titanium', color: getNibMaterialColor('titanium') },
-			{ material: '14k gold', label: 'Gold', color: getNibMaterialColor('14k gold') }
+			{ material: 'steel', label: 'Steel', color: getNibMaterialColor('steel'), outlined: false },
+			{ material: 'titanium', label: 'Titanium', color: getNibMaterialColor('titanium'), outlined: false },
+			{ material: '14k_gold', label: 'Gold', color: getNibMaterialColor('14k_gold'), outlined: false },
+			{ material: 'palladium', label: 'Palladium', color: getNibMaterialColor('palladium'), outlined: false },
+			{ material: 'unknown', label: 'Other/Unknown', color: '#6b7280', outlined: true }
 		];
 
 		nibMaterials.forEach((item, i) => {
@@ -141,9 +161,9 @@
 				.attr('cx', 6)
 				.attr('cy', 0)
 				.attr('r', 5)
-				.attr('fill', item.color)
-				.attr('stroke', '#fff')
-				.attr('stroke-width', 1);
+				.attr('fill', item.outlined ? 'none' : item.color)
+				.attr('stroke', item.outlined ? item.color : '#fff')
+				.attr('stroke-width', item.outlined ? 2 : 1);
 
 			legendRow.append('text')
 				.attr('x', 18)
@@ -163,9 +183,19 @@
 			.attr('cx', d => xScale(d.cost))
 			.attr('cy', d => yScale(d.score))
 			.attr('r', d => d.id === highlightedItem ? 8 : 5)
-			.attr('fill', d => d.id === highlightedItem ? '#3b82f6' : getNibMaterialColor(d.specs.nib_material))
-			.attr('stroke', '#fff')
-			.attr('stroke-width', 2)
+			.attr('fill', d => {
+				if (d.id === highlightedItem) return '#3b82f6';
+				const color = getNibMaterialColor(d.specs.nib_material);
+				return color === 'transparent' ? 'none' : color;
+			})
+			.attr('stroke', d => {
+				const color = getNibMaterialColor(d.specs.nib_material);
+				return color === 'transparent' ? '#6b7280' : '#fff';
+			})
+			.attr('stroke-width', d => {
+				const color = getNibMaterialColor(d.specs.nib_material);
+				return color === 'transparent' ? 2 : 2;
+			})
 			.style('cursor', 'pointer')
 			.on('mouseover', function(event, d) {
 				d3.select(this).attr('r', 8).attr('fill', '#3b82f6');
@@ -174,13 +204,42 @@
 			})
 			.on('mouseout', function(event, d) {
 				if (d.id !== highlightedItem) {
-					d3.select(this).attr('r', 5).attr('fill', getNibMaterialColor(d.specs.nib_material));
+					const color = getNibMaterialColor(d.specs.nib_material);
+					d3.select(this)
+						.attr('r', 5)
+						.attr('fill', color === 'transparent' ? 'none' : color)
+						.attr('stroke', color === 'transparent' ? '#6b7280' : '#fff');
 				}
 				hideTooltip();
 				onItemHover(null);
 			})
 			.on('click', function(event, d) {
-				onItemClick(d);
+				// Expand the accordion for this item
+				expandedItems.add(d.id);
+				expandedItems = expandedItems;
+				
+				// Briefly highlight the item being navigated to
+				onItemHover(d);
+				
+				// Scroll to the pen in the list after expansion animation starts
+				setTimeout(() => {
+					const penElement = document.getElementById(`pen-${d.id}`);
+					if (penElement) {
+						// Add a temporary highlight effect
+						penElement.style.transform = 'scale(1.02)';
+						penElement.style.transition = 'transform 0.2s ease-out';
+						
+						penElement.scrollIntoView({ 
+							behavior: 'smooth', 
+							block: 'center' 
+						});
+						
+						// Remove highlight effect
+						setTimeout(() => {
+							penElement.style.transform = '';
+						}, 600);
+					}
+				}, 200); // Delay to allow accordion animation to start
 			});
 	}
 
@@ -198,7 +257,7 @@
 				<div class="font-semibold">${item.name}</div>
 				<div class="text-sm text-gray-600">Cost: $${item.cost}</div>
 				<div class="text-sm text-gray-600">Score: ${item.score.toFixed(1)}</div>
-				${item.url ? `<div class="text-xs text-gray-500 mt-1">Click the dot for more info</div>` : ''}
+				<div class="text-xs text-gray-500 mt-1">Click to view details below</div>
 			`;
 			
 			// Check if tooltip would overflow the right edge
@@ -290,7 +349,8 @@
 				{@const isHighlighted = highlightedItem === item.id}
 				{@const isExpanded = expandedItems.has(item.id)}
 				<div 
-					class="border border-gray-200 rounded-lg transition-all duration-200 {isHighlighted ? 'ring-2 ring-blue-500 bg-blue-50' : ''}"
+					id="pen-{item.id}"
+					class="border border-gray-200 rounded-lg transition-all duration-300 {isHighlighted ? 'ring-2 ring-blue-500 bg-blue-50' : ''} {isExpanded ? 'shadow-lg' : 'shadow-sm'}"
 				>
 					<!-- Main pen info - clickable to expand -->
 					<div 
@@ -324,7 +384,7 @@
 							<div class="flex items-center ml-2 space-x-2">
 								<!-- Expand Arrow -->
 								<svg 
-									class="w-5 h-5 text-gray-400 transform transition-transform {isExpanded ? 'rotate-180' : ''}"
+									class="w-5 h-5 text-gray-400 transform transition-transform duration-300 ease-out {isExpanded ? 'rotate-180' : ''}"
 									fill="currentColor" 
 									viewBox="0 0 20 20"
 								>
@@ -334,9 +394,9 @@
 								<!-- External Link Icon -->
 								{#if item.url}
 									<button
-										on:click|stopPropagation={() => onItemClick(item)}
+										on:click|stopPropagation={() => window.open(item.url, '_blank')}
 										class="text-gray-400 hover:text-blue-600 transition-colors"
-										title="View product page"
+										title="Open product page in new tab"
 									>
 										<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
 											<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
@@ -350,7 +410,10 @@
 
 					<!-- Expandable specifications section -->
 					{#if isExpanded}
-						<div class="border-t border-gray-200 p-4 bg-gray-50">
+						<div 
+							class="border-t border-gray-200 p-4 bg-gray-50"
+							transition:slide={{ duration: 400, easing: quintOut }}
+						>
 							<h5 class="font-medium text-gray-900 mb-3">Specifications</h5>
 							<div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
 								{#each Object.entries(item.specs) as [key, value]}
