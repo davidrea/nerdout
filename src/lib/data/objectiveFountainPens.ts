@@ -17,20 +17,6 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		}
 	},
 	{
-		id: 'nib_plating',
-		name: 'Nib Plating',
-		description: 'Protective or decorative coating on the nib',
-		weight: 0.08,
-		defaultScore: 3,
-		values: {
-			'none': { value: 'None', score: 2 },
-			'gold': { value: 'Gold Plated', score: 4 },
-			'ruthenium': { value: 'Ruthenium', score: 4 },
-			'rhodium': { value: 'Rhodium', score: 4 },
-			'anodized': { value: 'Anodized', score: 3 }
-		}
-	},
-	{
 		id: 'body_material',
 		name: 'Body Material',
 		description: 'Material of the pen barrel',
@@ -67,6 +53,24 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 			'carbon_fiber': { value: 'Carbon Fiber', score: 4 },
 			'ultem': { value: 'Ultem', score: 4 },
 			'n/a': { value: 'N/A (Capless)', score: 3 }
+		}
+	},
+	{
+		id: 'grip_section_material',
+		name: 'Grip Section Material',
+		description: 'Material used in the grip section where the pen is held',
+		weight: 0.08,
+		defaultScore: 3,
+		values: {
+			'resin': { value: 'Resin', score: 3 },
+			'acrylic': { value: 'Acrylic', score: 3 },
+			'ebonite': { value: 'Ebonite', score: 5 },
+			'metal': { value: 'Metal', score: 2 },
+			'plastic': { value: 'Plastic', score: 2 },
+			'composite': { value: 'Composite (Fiberglass/Carbon)', score: 4 },
+			'wood': { value: 'Wood', score: 4 },
+			'rubberized': { value: 'Rubberized/Soft Touch', score: 4 },
+			'ultem': { value: 'Ultem', score: 4 }
 		}
 	},
 	{
@@ -192,9 +196,9 @@ export const objectiveFountainPens: Item[] = [
 		url: 'https://www.pilotpen.com',
 		specs: {
 			nib_material: '14k_gold',
-			nib_plating: 'none',
 			body_material: 'resin',
 			cap_material: 'resin',
+			grip_section_material: 'resin',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -213,9 +217,9 @@ export const objectiveFountainPens: Item[] = [
 		url: 'https://www.lamy.com',
 		specs: {
 			nib_material: '14k_gold',
-			nib_plating: 'none',
 			body_material: 'carbon_fiber',
 			cap_material: 'carbon_fiber',
+			grip_section_material: 'metal',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -234,9 +238,9 @@ export const objectiveFountainPens: Item[] = [
 		url: 'https://sailor.co.jp',
 		specs: {
 			nib_material: '21k_gold',
-			nib_plating: 'gold',
 			body_material: 'resin',
 			cap_material: 'resin',
+			grip_section_material: 'resin',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -255,9 +259,9 @@ export const objectiveFountainPens: Item[] = [
 		url: 'https://www.twsbi.com',
 		specs: {
 			nib_material: 'steel',
-			nib_plating: 'none',
 			body_material: 'acrylic',
 			cap_material: 'acrylic',
+			grip_section_material: 'plastic',
 			feed_material: 'plastic',
 			exterior_decoration: 'demonstrator',
 			scarcity: 'production',
@@ -276,9 +280,9 @@ export const objectiveFountainPens: Item[] = [
 		url: 'https://www.montblanc.com',
 		specs: {
 			nib_material: '14k_gold',
-			nib_plating: 'gold',
 			body_material: 'resin',
 			cap_material: 'resin',
+			grip_section_material: 'resin',
 			feed_material: 'ebonite',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -297,9 +301,9 @@ export const objectiveFountainPens: Item[] = [
 		url: 'https://www.platinum-pen.co.jp',
 		specs: {
 			nib_material: '14k_gold',
-			nib_plating: 'none',
 			body_material: 'resin',
 			cap_material: 'resin',
+			grip_section_material: 'resin',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -318,9 +322,9 @@ export const objectiveFountainPens: Item[] = [
 		url: 'https://www.pilotpen.com',
 		specs: {
 			nib_material: '18k_gold',
-			nib_plating: 'rhodium',
 			body_material: 'brass',
 			cap_material: null,
+			grip_section_material: 'metal',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -339,9 +343,9 @@ export const objectiveFountainPens: Item[] = [
 		url: 'https://www.pelikan.com',
 		specs: {
 			nib_material: '18k_gold',
-			nib_plating: 'gold',
 			body_material: 'acrylic',
 			cap_material: 'acrylic',
+			grip_section_material: 'resin',
 			feed_material: 'ebonite',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -359,9 +363,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'Vintage-inspired flex nib pen from USA',
 		specs: {
 			nib_material: 'steel',
-			nib_plating: 'none',
 			body_material: 'resin',
 			cap_material: 'resin',
+			grip_section_material: 'resin',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -379,9 +383,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'Handcrafted urushi lacquer with maki-e artwork',
 		specs: {
 			nib_material: '18k_gold',
-			nib_plating: 'gold',
 			body_material: 'ebonite',
 			cap_material: 'ebonite',
+			grip_section_material: 'ebonite',
 			feed_material: 'ebonite',
 			exterior_decoration: 'urushi',
 			scarcity: 'limited_edition',
@@ -399,9 +403,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'Classic hooded nib design from the 1940s',
 		specs: {
 			nib_material: '14k_gold',
-			nib_plating: 'none',
 			body_material: 'celluloid',
 			cap_material: 'celluloid',
+			grip_section_material: 'plastic',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'vintage',
@@ -419,9 +423,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'Compact pocket fountain pen from Germany',
 		specs: {
 			nib_material: 'steel',
-			nib_plating: 'none',
 			body_material: 'plastic',
 			cap_material: 'plastic',
+			grip_section_material: 'plastic',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -439,9 +443,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'Italian pen made from volcanic lava',
 		specs: {
 			nib_material: 'palladium',
-			nib_plating: 'none',
 			body_material: 'carbon_fiber',
 			cap_material: 'carbon_fiber',
+			grip_section_material: 'composite',
 			feed_material: 'ebonite',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -459,9 +463,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'Classic Italian pen with piston filler',
 		specs: {
 			nib_material: '14k_gold',
-			nib_plating: 'gold',
 			body_material: 'resin',
 			cap_material: 'resin',
+			grip_section_material: 'resin',
 			feed_material: 'ebonite',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -479,9 +483,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'Modern Italian design with unique resin',
 		specs: {
 			nib_material: 'steel',
-			nib_plating: 'none',
 			body_material: 'resin',
 			cap_material: 'resin',
+			grip_section_material: 'resin',
 			feed_material: 'ebonite',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -499,9 +503,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'Taiwanese demonstrator with eyedropper filling',
 		specs: {
 			nib_material: 'steel',
-			nib_plating: 'none',
 			body_material: 'acrylic',
 			cap_material: 'acrylic',
+			grip_section_material: 'ebonite',
 			feed_material: 'ebonite',
 			exterior_decoration: 'demonstrator',
 			scarcity: 'production',
@@ -519,9 +523,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'American classic with slim profile',
 		specs: {
 			nib_material: 'steel',
-			nib_plating: 'gold',
 			body_material: 'brass',
 			cap_material: 'brass',
+			grip_section_material: 'metal',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -539,9 +543,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'Budget-friendly starter pen with excellent value',
 		specs: {
 			nib_material: 'steel',
-			nib_plating: 'none',
 			body_material: 'brass',
 			cap_material: 'brass',
+			grip_section_material: 'metal',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
@@ -559,9 +563,9 @@ export const objectiveFountainPens: Item[] = [
 		description: 'American boutique pen with interchangeable nibs',
 		specs: {
 			nib_material: 'steel',
-			nib_plating: 'none',
 			body_material: 'acrylic',
 			cap_material: 'acrylic',
+			grip_section_material: 'acrylic',
 			feed_material: 'plastic',
 			exterior_decoration: 'none',
 			scarcity: 'production',
