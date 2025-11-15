@@ -5,7 +5,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'nib_material',
 		name: 'Nib Material',
 		description: 'Material composition of the writing nib',
-		weight: 0.25,
+		weight: 0.24,
 		defaultScore: 3,
 		values: {
 			'steel': { value: 'Steel', score: 3 },
@@ -20,7 +20,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'body_material',
 		name: 'Body Material',
 		description: 'Material of the pen barrel',
-		weight: 0.15,
+		weight: 0.1,
 		defaultScore: 3,
 		values: {
 			'plastic': { value: 'Plastic', score: 1 },
@@ -39,7 +39,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'cap_material',
 		name: 'Cap Material',
 		description: 'Material of the pen cap (if applicable)',
-		weight: 0.08,
+		weight: 0.06,
 		defaultScore: 3,
 		values: {
 			'plastic': { value: 'Plastic', score: 1 },
@@ -59,7 +59,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'grip_section_material',
 		name: 'Grip Section Material',
 		description: 'Material used in the grip section where the pen is held',
-		weight: 0.08,
+		weight: 0.09,
 		defaultScore: 3,
 		values: {
 			'resin': { value: 'Resin', score: 3 },
@@ -77,7 +77,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'feed_material',
 		name: 'Feed Material',
 		description: 'Material of the ink feed system',
-		weight: 0.10,
+		weight: 0.08,
 		defaultScore: 3,
 		values: {
 			'plastic': { value: 'Plastic', score: 2 },
@@ -89,7 +89,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'exterior_decoration',
 		name: 'Exterior Decoration',
 		description: 'Special decorative treatments or finishes',
-		weight: 0.07,
+		weight: 0.05,
 		defaultScore: 3,
 		values: {
 			'none': { value: 'None', score: 3 },
@@ -104,7 +104,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'scarcity',
 		name: 'Scarcity',
 		description: 'Production status and availability',
-		weight: 0.05,
+		weight: 0.04,
 		defaultScore: 3,
 		values: {
 			'production': { value: 'In Production', score: 2 },
@@ -117,7 +117,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'country_origin',
 		name: 'Country of Origin',
 		description: 'Manufacturing country',
-		weight: 0.06,
+		weight: 0.05,
 		defaultScore: 3,
 		values: {
 			'japan': { value: 'Japan', score: 5 },
@@ -134,7 +134,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'filling_system',
 		name: 'Filling System',
 		description: 'Method of ink storage and delivery',
-		weight: 0.12,
+		weight: 0.16,
 		defaultScore: 3,
 		values: {
 			'cartridge_only': { value: 'Cartridge Only', score: 2 },
@@ -150,7 +150,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'cap_style',
 		name: 'Cap Style',
 		description: 'How the cap attaches to the pen',
-		weight: 0.03,
+		weight: 0.025,
 		defaultScore: 3,
 		values: {
 			'snap': { value: 'Snap Cap', score: 3 },
@@ -163,7 +163,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'clip_style',
 		name: 'Clip Style',
 		description: 'Type and design of the pen clip',
-		weight: 0.04,
+		weight: 0.025,
 		defaultScore: 3,
 		values: {
 			'none': { value: 'No Clip', score: 3 },
@@ -176,7 +176,7 @@ export const objectiveFountainPenCriteria: Criterion[] = [
 		id: 'nib_size_range',
 		name: 'Nib Size Range',
 		description: 'Variety of available nib sizes',
-		weight: 0.05,
+		weight: 0.08,
 		defaultScore: 3,
 		values: {
 			'limited': { value: 'Limited (1-2 sizes)', score: 2 },

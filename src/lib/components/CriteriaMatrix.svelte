@@ -11,6 +11,61 @@
 	let comparisonMatrix: Record<string, Record<string, 'up' | 'left' | 'equal'>> = {};
 	let matrixInitialized = false;
 
+	const criteriaPriority: Record<string, number> = {
+		// Writing performance factors
+		nib_material: 100,
+		filling_system: 95,
+		feed_material: 92,
+		grip_section_material: 90,
+		nib_size_range: 85,
+		// Build & feel
+		body_material: 78,
+		cap_material: 52,
+		// Aesthetics & provenance
+		exterior_decoration: 68,
+		country_origin: 60,
+		// Collectibility & trim
+		scarcity: 58,
+		cap_style: 44,
+		clip_style: 32
+	};
+
+	function createPairKey(a: string, b: string): string {
+		return [a, b].sort().join('|');
+	}
+
+	const equalPreferencePairs = new Set(
+		[
+			['nib_material', 'filling_system'],
+			['feed_material', 'grip_section_material'],
+			['nib_size_range', 'body_material'],
+			['country_origin', 'scarcity'],
+			['cap_material', 'cap_style']
+		].map(([a, b]) => createPairKey(a, b))
+	);
+
+	function determineDefaultPreference(aId: string, bId: string): 'up' | 'left' | 'equal' {
+		if (aId === bId) return 'equal';
+
+		const pairKey = createPairKey(aId, bId);
+		if (equalPreferencePairs.has(pairKey)) {
+			return 'equal';
+		}
+
+		const priorityA = criteriaPriority[aId];
+		const priorityB = criteriaPriority[bId];
+
+		if (priorityA === undefined || priorityB === undefined) {
+			return 'equal';
+		}
+
+		if (priorityA === priorityB) {
+			return 'equal';
+		}
+
+		return priorityA > priorityB ? 'left' : 'up';
+	}
+
 	// Initialize matrix with default values based on research-derived weights
 	$: if (criteria.length > 0 && !matrixInitialized) {
 		initializeMatrix();
@@ -19,138 +74,13 @@
 	function initializeMatrix() {
 		const matrix: Record<string, Record<string, 'up' | 'left' | 'equal'>> = {};
 		
-		// Create a realistic default matrix based on fountain pen community preferences
-		// Research from The Pen Addict, Gentleman Stationer, and fountain pen forums
-		const defaultComparisons: Record<string, 'up' | 'left' | 'equal'> = {
-			// Nib Material vs others (premium materials highly valued)
-			'nib_material_vs_ink_capacity': 'left', // nib material wins
-			'nib_material_vs_body_material': 'left', // nib material wins  
-			'nib_material_vs_filling_mechanism': 'left', // nib material wins
-			'nib_material_vs_brand_prestige': 'equal', // close - both matter for luxury
-			'nib_material_vs_size_weight': 'left', // nib material wins
-			'nib_material_vs_cap_mechanism': 'left', // nib material wins
-			'nib_material_vs_line_variation': 'equal', // both writing-focused
-			'nib_material_vs_availability': 'left', // nib material wins
-			'nib_material_vs_included_accessories': 'left', // nib material wins
-			'nib_material_vs_design_aesthetic': 'left', // nib material wins
-			'nib_material_vs_country_origin': 'left', // nib material wins
-			'nib_material_vs_vintage_collectible': 'equal', // collectors value both
-			
-			// Ink Capacity vs others (practical writing concern)
-			'ink_capacity_vs_body_material': 'up', // body material more important
-			'ink_capacity_vs_filling_mechanism': 'up', // filling mechanism more important
-			'ink_capacity_vs_brand_prestige': 'up', // brand prestige wins
-			'ink_capacity_vs_size_weight': 'equal', // both practical considerations
-			'ink_capacity_vs_cap_mechanism': 'left', // ink capacity wins
-			'ink_capacity_vs_line_variation': 'up', // line variation more important
-			'ink_capacity_vs_availability': 'equal', // both practical
-			'ink_capacity_vs_included_accessories': 'left', // ink capacity wins
-			'ink_capacity_vs_design_aesthetic': 'up', // aesthetics often win
-			'ink_capacity_vs_country_origin': 'left', // ink capacity wins
-			'ink_capacity_vs_vintage_collectible': 'up', // collectible value wins
-			
-			// Body Material vs others (affects durability and feel)
-			'body_material_vs_filling_mechanism': 'equal', // both important for quality
-			'body_material_vs_brand_prestige': 'up', // brand often trumps material
-			'body_material_vs_size_weight': 'left', // material affects feel more
-			'body_material_vs_cap_mechanism': 'left', // body material wins
-			'body_material_vs_line_variation': 'up', // writing performance wins
-			'body_material_vs_availability': 'left', // body material wins
-			'body_material_vs_included_accessories': 'left', // body material wins
-			'body_material_vs_design_aesthetic': 'equal', // material is part of aesthetics
-			'body_material_vs_country_origin': 'left', // material more tangible
-			'body_material_vs_vintage_collectible': 'up', // vintage trumps material
-			
-			// Filling Mechanism vs others (affects user experience)
-			'filling_mechanism_vs_brand_prestige': 'up', // brand prestige often wins
-			'filling_mechanism_vs_size_weight': 'equal', // both ergonomic factors
-			'filling_mechanism_vs_cap_mechanism': 'left', // filling more important
-			'filling_mechanism_vs_line_variation': 'up', // writing performance wins
-			'filling_mechanism_vs_availability': 'left', // mechanism wins
-			'filling_mechanism_vs_included_accessories': 'left', // mechanism wins
-			'filling_mechanism_vs_design_aesthetic': 'up', // aesthetics often preferred
-			'filling_mechanism_vs_country_origin': 'left', // mechanism more practical
-			'filling_mechanism_vs_vintage_collectible': 'up', // vintage value wins
-			
-			// Brand Prestige vs others (strong influence in fountain pen world)
-			'brand_prestige_vs_size_weight': 'left', // prestige wins
-			'brand_prestige_vs_cap_mechanism': 'left', // prestige wins
-			'brand_prestige_vs_line_variation': 'equal', // both highly valued
-			'brand_prestige_vs_availability': 'left', // prestige wins
-			'brand_prestige_vs_included_accessories': 'left', // prestige wins
-			'brand_prestige_vs_design_aesthetic': 'equal', // prestige includes aesthetics
-			'brand_prestige_vs_country_origin': 'equal', // origin affects prestige
-			'brand_prestige_vs_vintage_collectible': 'up', // vintage often more valuable
-			
-			// Size/Weight vs others (ergonomic comfort)
-			'size_weight_vs_cap_mechanism': 'left', // size/weight more important
-			'size_weight_vs_line_variation': 'up', // writing performance wins
-			'size_weight_vs_availability': 'left', // comfort wins
-			'size_weight_vs_included_accessories': 'left', // comfort wins
-			'size_weight_vs_design_aesthetic': 'up', // aesthetics often preferred
-			'size_weight_vs_country_origin': 'left', // comfort more immediate
-			'size_weight_vs_vintage_collectible': 'up', // vintage value wins
-			
-			// Cap Mechanism vs others (practical but lower priority)
-			'cap_mechanism_vs_line_variation': 'up', // writing performance wins
-			'cap_mechanism_vs_availability': 'equal', // both practical
-			'cap_mechanism_vs_included_accessories': 'equal', // both secondary features
-			'cap_mechanism_vs_design_aesthetic': 'up', // aesthetics preferred
-			'cap_mechanism_vs_country_origin': 'equal', // both secondary
-			'cap_mechanism_vs_vintage_collectible': 'up', // vintage wins
-			
-			// Line Variation vs others (critical for writing enthusiasts)
-			'line_variation_vs_availability': 'left', // performance over convenience
-			'line_variation_vs_included_accessories': 'left', // performance wins
-			'line_variation_vs_design_aesthetic': 'equal', // both matter for pen lovers
-			'line_variation_vs_country_origin': 'left', // performance wins
-			'line_variation_vs_vintage_collectible': 'up', // vintage often wins
-			
-			// Availability vs others (practical consideration)
-			'availability_vs_included_accessories': 'equal', // both secondary
-			'availability_vs_design_aesthetic': 'up', // aesthetics preferred
-			'availability_vs_country_origin': 'equal', // both secondary
-			'availability_vs_vintage_collectible': 'up', // vintage wins
-			
-			// Included Accessories vs others (usually least important)
-			'included_accessories_vs_design_aesthetic': 'up', // aesthetics win
-			'included_accessories_vs_country_origin': 'up', // origin more interesting
-			'included_accessories_vs_vintage_collectible': 'up', // vintage wins
-			
-			// Design Aesthetic vs others (highly valued by enthusiasts)
-			'design_aesthetic_vs_country_origin': 'left', // aesthetics win
-			'design_aesthetic_vs_vintage_collectible': 'up', // vintage often wins
-			
-			// Country/Origin vs others
-			'country_origin_vs_vintage_collectible': 'up' // vintage usually trumps origin
-		};
-		
 		criteria.forEach(critA => {
 			matrix[critA.id] = {};
 			criteria.forEach(critB => {
 				if (critA.id === critB.id) {
 					matrix[critA.id][critB.id] = 'equal';
 				} else {
-					// Look up the default comparison
-					const key1 = `${critA.id}_vs_${critB.id}`;
-					const key2 = `${critB.id}_vs_${critA.id}`;
-					
-					if (defaultComparisons[key1]) {
-						matrix[critA.id][critB.id] = defaultComparisons[key1];
-					} else if (defaultComparisons[key2]) {
-						// Reverse the comparison
-						const reversed = defaultComparisons[key2];
-						if (reversed === 'left') {
-							matrix[critA.id][critB.id] = 'up';
-						} else if (reversed === 'up') {
-							matrix[critA.id][critB.id] = 'left';
-						} else {
-							matrix[critA.id][critB.id] = 'equal';
-						}
-					} else {
-						// Default to equal if not specified
-						matrix[critA.id][critB.id] = 'equal';
-					}
+					matrix[critA.id][critB.id] = determineDefaultPreference(critA.id, critB.id);
 				}
 			});
 		});
