@@ -16,31 +16,52 @@
 	let highlightedItem: string | null = null;
 	let currentSection: 'nerdout' | 'nerdwayout' | 'nerdwaywayout' = 'nerdout';
 
+	// Price range filter state
+	let priceMin: number = 0;
+	let priceMax: number = 10000;
+	let selectedPriceMin: number = 0;
+	let selectedPriceMax: number = 10000;
+
 	// Initialize data
 	onMount(() => {
 		items = [...objectiveFountainPens];
 		criteria = [...objectiveFountainPenCriteria];
+
+		// Calculate min/max prices from all items
+		if (items.length > 0) {
+			const costs = items.map(item => item.cost);
+			priceMin = Math.floor(Math.min(...costs));
+			priceMax = Math.ceil(Math.max(...costs));
+			selectedPriceMin = priceMin;
+			selectedPriceMax = priceMax;
+		}
+
 		updateFilteredItems();
 	});
 
-	// Update filtered items when items, filters, or search term change
-	$: if (items && filters && searchTerm !== undefined) {
+	// Update filtered items when items, filters, search term, or price range change
+	$: if (items && filters && searchTerm !== undefined && selectedPriceMin !== undefined && selectedPriceMax !== undefined) {
 		updateFilteredItems();
 	}
 
 	function updateFilteredItems() {
 		let result = [...items];
-		
+
 		// Apply search
 		if (searchTerm) {
 			result = searchItems(result, searchTerm);
 		}
-		
+
 		// Apply filters
 		if (filters.length > 0) {
 			result = applyFilters(result, filters);
 		}
-		
+
+		// Apply price range filter
+		result = result.filter(item =>
+			item.cost >= selectedPriceMin && item.cost <= selectedPriceMax
+		);
+
 		filteredItems = result;
 	}
 
@@ -83,6 +104,11 @@
 
 	function handleSearchChange(event: CustomEvent<string>) {
 		searchTerm = event.detail;
+	}
+
+	function handlePriceRangeChange(event: CustomEvent<{ min: number, max: number }>) {
+		selectedPriceMin = event.detail.min;
+		selectedPriceMax = event.detail.max;
 	}
 
 	function scrollToSection(section: 'nerdout' | 'nerdwayout' | 'nerdwaywayout') {
@@ -159,12 +185,17 @@
 
 		<!-- Filter Panel -->
 		<div class="mb-8">
-			<FilterPanel 
+			<FilterPanel
 				{items}
 				{filters}
 				{searchTerm}
+				{priceMin}
+				{priceMax}
+				{selectedPriceMin}
+				{selectedPriceMax}
 				on:filtersChange={handleFiltersChange}
 				on:searchChange={handleSearchChange}
+				on:priceRangeChange={handlePriceRangeChange}
 			/>
 		</div>
 
