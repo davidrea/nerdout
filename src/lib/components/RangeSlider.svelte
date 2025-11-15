@@ -44,6 +44,7 @@
 		const value = parseFloat(target.value);
 		if (value <= maxValue) {
 			minValue = value;
+			dispatch('change', { min: minValue, max: maxValue });
 		}
 	}
 
@@ -52,6 +53,7 @@
 		const value = parseFloat(target.value);
 		if (value >= minValue) {
 			maxValue = value;
+			dispatch('change', { min: minValue, max: maxValue });
 		}
 	}
 
