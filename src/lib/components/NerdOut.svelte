@@ -9,9 +9,9 @@
 	export let highlightedItem: string | null = null;
 	export let onItemHover: (item: Item | null) => void = () => {};
 	export let onItemClick: (item: Item) => void = () => {};
-	export let compact = false;
 
 	let svgElement: SVGSVGElement;
+	let expandedItems: Set<string> = new Set();
 	let tooltip: HTMLDivElement;
 	let containerElement: HTMLDivElement;
 	
@@ -19,21 +19,21 @@
 	let containerWidth = 800;
 	let containerHeight = 500;
 	
-	$: svgWidth = compact ? Math.min(containerWidth, 400) : containerWidth;
-	$: svgHeight = compact ? Math.min(containerHeight, 300) : Math.max(containerWidth * 0.6, 400);
+	$: svgWidth = containerWidth;
+	$: svgHeight = Math.max(containerWidth * 0.6, 400);
 	
 	// Observe container size changes
 	function updateDimensions() {
 		if (containerElement) {
 			const rect = containerElement.getBoundingClientRect();
 			containerWidth = Math.max(rect.width || 400, 300); // Minimum 300px
-			containerHeight = compact ? 300 : Math.max(containerWidth * 0.6, 400);
+			containerHeight = Math.max(containerWidth * 0.6, 400);
 		}
 	}
 
-	$: plotData = items.map(item => ({
+	$: plotData = (items || []).map(item => ({
 		...item,
-		score: calculateItemScore(item, criteria)
+		score: calculateItemScore(item, criteria || [])
 	}));
 
 	function getNibMaterialColor(nibMaterial: string): string {
@@ -47,13 +47,8 @@
 		}
 	}
 
-	// Force re-render when plotData or compact mode changes
+	// Force re-render when plotData changes
 	$: if (svgElement && plotData) {
-		renderPlot();
-	}
-	
-	// Force re-render when compact mode changes
-	$: if (svgElement && compact !== undefined) {
 		renderPlot();
 	}
 
@@ -74,9 +69,7 @@
 		const svg = d3.select(svgElement);
 		svg.selectAll('*').remove();
 
-		const margin = compact 
-			? { top: 20, right: 30, bottom: 45, left: 55 }  // Adequate margins for compact mode
-			: { top: 20, right: 30, bottom: 50, left: 60 };
+		const margin = { top: 20, right: 30, bottom: 50, left: 60 };
 		const width = svgWidth - margin.left - margin.right;
 		const height = svgHeight - margin.top - margin.bottom;
 
@@ -114,7 +107,7 @@
 			.call(d3.axisBottom(xAxisScale))
 			.append('text')
 			.attr('x', width / 2)
-			.attr('y', compact ? 30 : 35)  // Smaller Y offset for compact mode
+			.attr('y', 35)
 			.attr('fill', 'black')
 			.style('text-anchor', 'middle')
 			.text('Cost ($)');
@@ -123,7 +116,7 @@
 			.call(d3.axisLeft(yAxisScale))
 			.append('text')
 			.attr('transform', 'rotate(-90)')
-			.attr('y', compact ? -35 : -40)  // Smaller Y offset for compact mode
+			.attr('y', -40)
 			.attr('x', -height / 2)
 			.attr('fill', 'black')
 			.style('text-anchor', 'middle')
@@ -230,6 +223,15 @@
 		}
 	}
 
+	function toggleExpand(itemId: string) {
+		if (expandedItems.has(itemId)) {
+			expandedItems.delete(itemId);
+		} else {
+			expandedItems.add(itemId);
+		}
+		expandedItems = expandedItems;
+	}
+
 	onMount(() => {
 		updateDimensions();
 		renderPlot();
@@ -251,23 +253,139 @@
 	});
 </script>
 
-<div class="relative">
-	<h2 class="text-2xl font-bold mb-4">{compact ? 'Nerd Out (Plot)' : 'Nerd Out'}</h2>
-	
-	<div bind:this={containerElement} class="w-full">
-		<svg 
-			bind:this={svgElement}
-			width={svgWidth} 
-			height={svgHeight}
-			viewBox="0 0 {svgWidth} {svgHeight}"
-			class="border border-gray-300 rounded w-full h-auto max-w-full"
-			style="overflow: visible;"
-		></svg>
+<div class="space-y-6">
+	<div class="flex items-center justify-between">
+		<h2 class="text-2xl font-bold">Nerd Out</h2>
+		<div class="text-sm text-gray-600">
+			{plotData?.length || 0} pens • Interactive plot and list
+		</div>
 	</div>
 	
-	<div 
-		bind:this={tooltip}
-		class="absolute pointer-events-none opacity-0 bg-white border border-gray-300 rounded shadow-lg p-3 text-sm transition-opacity duration-200 z-50 max-w-xs"
-		style="display: none;"
-	></div>
+	<!-- Plot Section -->
+	<div class="relative">
+		<div bind:this={containerElement} class="w-full">
+			<svg 
+				bind:this={svgElement}
+				width={svgWidth} 
+				height={svgHeight}
+				viewBox="0 0 {svgWidth} {svgHeight}"
+				class="border border-gray-300 rounded w-full h-auto max-w-full"
+				style="overflow: visible;"
+			></svg>
+		</div>
+		
+		<div 
+			bind:this={tooltip}
+			class="absolute pointer-events-none opacity-0 bg-white border border-gray-300 rounded shadow-lg p-3 text-sm transition-opacity duration-200 z-50 max-w-xs"
+			style="display: none;"
+		></div>
+	</div>
+
+	<!-- Pen List Section -->
+	{#if plotData && plotData.length > 0}
+		<div class="mt-8">
+			<h3 class="text-lg font-semibold mb-4">All Fountain Pens</h3>
+			<div class="space-y-2">
+				{#each plotData as item (item.id)}
+				{@const isHighlighted = highlightedItem === item.id}
+				{@const isExpanded = expandedItems.has(item.id)}
+				<div 
+					class="border border-gray-200 rounded-lg transition-all duration-200 {isHighlighted ? 'ring-2 ring-blue-500 bg-blue-50' : ''}"
+				>
+					<!-- Main pen info - clickable to expand -->
+					<div 
+						class="p-4 cursor-pointer hover:bg-gray-50"
+						on:mouseenter={() => onItemHover(item)}
+						on:mouseleave={() => onItemHover(null)}
+						on:click={() => toggleExpand(item.id)}
+					>
+						<div class="flex items-center justify-between">
+							<div class="flex-1">
+								<div class="font-semibold text-lg">{item.name}</div>
+								<div class="text-sm text-gray-600 mt-1">
+									Score: {item.score.toFixed(1)} • Cost: ${item.cost}
+								</div>
+								{#if item.description}
+									<div class="text-sm text-gray-500 mt-1">{item.description}</div>
+								{/if}
+							</div>
+							
+							<!-- Nib Material Badge -->
+							<div class="ml-4">
+								<span 
+									class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
+									style="background-color: {getNibMaterialColor(item.specs.nib_material)}"
+								>
+									{item.specs.nib_material?.replace('_', ' ') || 'Unknown'}
+								</span>
+							</div>
+							
+							<!-- Expand/External Link Icons -->
+							<div class="flex items-center ml-2 space-x-2">
+								<!-- Expand Arrow -->
+								<svg 
+									class="w-5 h-5 text-gray-400 transform transition-transform {isExpanded ? 'rotate-180' : ''}"
+									fill="currentColor" 
+									viewBox="0 0 20 20"
+								>
+									<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+								</svg>
+								
+								<!-- External Link Icon -->
+								{#if item.url}
+									<button
+										on:click|stopPropagation={() => onItemClick(item)}
+										class="text-gray-400 hover:text-blue-600 transition-colors"
+										title="View product page"
+									>
+										<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+											<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
+											<path d="M5 5a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2a1 1 0 10-2 0v2H5V7h2a1 1 0 000-2H5z"></path>
+										</svg>
+									</button>
+								{/if}
+							</div>
+						</div>
+					</div>
+
+					<!-- Expandable specifications section -->
+					{#if isExpanded}
+						<div class="border-t border-gray-200 p-4 bg-gray-50">
+							<h5 class="font-medium text-gray-900 mb-3">Specifications</h5>
+							<div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+								{#each Object.entries(item.specs) as [key, value]}
+									{#if value !== null}
+										<div>
+											<span class="text-gray-600 capitalize">{key.replace(/_/g, ' ')}: </span>
+											<span class="font-medium">
+												{#if Array.isArray(value)}
+													{value.join(', ')}
+												{:else}
+													{value.replace(/_/g, ' ')}
+												{/if}
+											</span>
+										</div>
+									{/if}
+								{/each}
+							</div>
+							
+							{#if item.url}
+								<div class="mt-4 pt-3 border-t border-gray-300">
+									<a 
+										href={item.url} 
+										target="_blank" 
+										rel="noopener noreferrer"
+										class="text-blue-600 hover:text-blue-800 text-sm"
+									>
+										View Product Page →
+									</a>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{/each}
+		</div>
+	</div>
+	{/if}
 </div>

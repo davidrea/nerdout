@@ -1,151 +1,112 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	import { flip } from 'svelte/animate';
-	import { quintOut } from 'svelte/easing';
-	import type { Item, Criterion } from '../types';
-	import { calculateItemScore } from '../scoring';
+	import type { Criterion, CriterionValue } from '../types';
 
-	export let items: Item[] = [];
 	export let criteria: Criterion[] = [];
-	export let highlightedItem: string | null = null;
-	export let onItemHighlight: (itemId: string | null) => void = () => {};
+	export let onCriteriaUpdate: (criteria: Criterion[]) => void = () => {};
 
-	const dispatch = createEventDispatcher();
+	let expandedCriteria: Set<string> = new Set();
 
-	let expandedItems: Set<string> = new Set();
-	function toggleExpand(itemId: string) {
-		if (expandedItems.has(itemId)) {
-			expandedItems.delete(itemId);
-			onItemHighlight(null);
+	function toggleExpand(criterionId: string) {
+		if (expandedCriteria.has(criterionId)) {
+			expandedCriteria.delete(criterionId);
 		} else {
-			expandedItems.add(itemId);
-			onItemHighlight(itemId);
+			expandedCriteria.add(criterionId);
 		}
-		expandedItems = expandedItems;
+		expandedCriteria = expandedCriteria;
 	}
 
-	let shouldAnimate = false;
-	let lastSortedItems: Item[] = [];
-	let stableOrder: Item[] = [];
-	let sortedItems: Item[] = [];
-
-	$: {
-		// Guard against SSR and empty data
-		if (items && criteria && calculateItemScore) {
-			if (expandedItems.size === 0) {
-				// No items expanded - sort normally and update stable order
-				const newSortedItems = [...items].sort((a, b) => {
-					const scoreA = calculateItemScore(a, criteria);
-					const scoreB = calculateItemScore(b, criteria);
-					return scoreB - scoreA;
-				});
-				sortedItems = newSortedItems;
-				stableOrder = [...newSortedItems];
-			} else {
-				// Items are expanded - maintain the stable order
-				sortedItems = stableOrder.length > 0 ? [...stableOrder] : [...items];
+	function updateCriterionValueScore(criterionId: string, valueKey: string, score: number) {
+		const updatedCriteria = criteria.map(criterion => {
+			if (criterion.id === criterionId) {
+				return {
+					...criterion,
+					values: {
+						...criterion.values,
+						[valueKey]: {
+							...criterion.values[valueKey],
+							score: score
+						}
+					}
+				};
 			}
-		} else {
-			// Fallback for SSR or when data is not ready
-			sortedItems = items || [];
-		}
+			return criterion;
+		});
+		onCriteriaUpdate(updatedCriteria);
 	}
 
-	// Detect when sorting changes to trigger animations
-	$: {
-		if (lastSortedItems.length > 0 && expandedItems.size === 0) {
-			const orderChanged = !sortedItems.every((item, index) => 
-				lastSortedItems[index]?.id === item.id
-			);
-			shouldAnimate = orderChanged;
-		}
-		lastSortedItems = [...sortedItems];
-	}
 </script>
 
-<div class="space-y-4">
+<div class="space-y-6">
 	<div class="flex items-center justify-between">
 		<h2 class="text-2xl font-bold">Nerd Way Out</h2>
 		<div class="text-sm text-gray-600">
-			{items.length} items • Click to expand for specifications
+			{criteria.length} criteria • Click to expand and score individual spec values
 		</div>
 	</div>
 
-
-	<!-- Items list -->
-	<div class="space-y-2">
-		{#each sortedItems || items as item (item.id)}
-			{@const isExpanded = expandedItems.has(item.id)}
-			{@const isHighlighted = highlightedItem === item.id}
-			{@const totalScore = calculateItemScore(item, criteria)}
-			
-			<div 
-				class="border border-gray-200 rounded-lg {isHighlighted ? 'ring-2 ring-blue-500' : ''} transition-all duration-300"
-				animate:flip={{ duration: 400, easing: quintOut }}
-			>
-				<div class="flex items-center justify-between p-4">
+	<!-- Individual Criteria with Value Scoring -->
+	<div class="space-y-4">
+		<h3 class="text-lg font-semibold">Score Specification Values</h3>
+		<p class="text-sm text-gray-600 mb-4">
+			Adjust how much you value each specification. These scores (1-5) determine how items are rated.
+		</p>
+		<div class="space-y-2">
+			{#each criteria as criterion}
+				{@const isExpanded = expandedCriteria.has(criterion.id)}
+				<div class="border border-gray-200 rounded-lg">
 					<button
-						on:click={() => toggleExpand(item.id)}
-						class="flex-1 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 rounded p-2"
+						on:click={() => toggleExpand(criterion.id)}
+						class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 rounded-lg"
 					>
-						<div class="flex items-center justify-between">
-							<div class="flex-1">
-								<div class="font-semibold text-lg">{item.name}</div>
-								<div class="text-sm text-gray-600 mt-1">
-									Score: {totalScore.toFixed(1)} • Cost: ${item.cost}
-								</div>
+						<div class="flex-1">
+							<div class="font-semibold text-lg">{criterion.name}</div>
+							{#if criterion.description}
+								<div class="text-sm text-gray-600 mt-1">{criterion.description}</div>
+							{/if}
+							<div class="text-xs text-gray-500 mt-1">
+								Weight: {(criterion.weight * 100).toFixed(1)}% • {Object.keys(criterion.values).length} values
 							</div>
-							<svg 
-								class="w-5 h-5 text-gray-400 transform transition-transform {isExpanded ? 'rotate-180' : ''}"
-								fill="currentColor" 
-								viewBox="0 0 20 20"
-							>
-								<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-							</svg>
 						</div>
+						<svg 
+							class="w-5 h-5 text-gray-400 transform transition-transform {isExpanded ? 'rotate-180' : ''}"
+							fill="currentColor" 
+							viewBox="0 0 20 20"
+						>
+							<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+						</svg>
 					</button>
-				</div>
 
-				{#if isExpanded}
-					<div class="border-t border-gray-200 p-4 bg-gray-50">
-						<!-- Specifications -->
-						{#if Object.keys(item.specs).length > 0}
-							<div>
-								<h5 class="font-medium text-gray-900 mb-3">Specifications</h5>
-								<div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-									{#each Object.entries(item.specs) as [key, value]}
-										{#if value !== null}
-											<div>
-												<span class="text-gray-600 capitalize">{key.replace(/_/g, ' ')}: </span>
-												<span class="font-medium">
-													{#if Array.isArray(value)}
-														{value.join(', ')}
-													{:else}
-														{value.replace(/_/g, ' ')}
-													{/if}
-												</span>
+					{#if isExpanded}
+						<div class="border-t border-gray-200 p-4 bg-gray-50">
+							<div class="space-y-3">
+								<h4 class="font-medium text-gray-900">Score Each Value (1-5 scale)</h4>
+								<p class="text-sm text-gray-600">1 = Poor, 3 = Average, 5 = Excellent</p>
+								<div class="grid gap-3">
+									{#each Object.entries(criterion.values) as [valueKey, valueData]}
+										<div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded">
+											<div class="flex-1">
+												<div class="font-medium">{valueData.value}</div>
 											</div>
-										{/if}
+											<div class="flex items-center space-x-2">
+												<input
+													type="range"
+													min="1"
+													max="5"
+													step="1"
+													value={valueData.score}
+													on:input={(e) => updateCriterionValueScore(criterion.id, valueKey, parseInt(e.currentTarget.value))}
+													class="w-24"
+												/>
+												<span class="w-8 text-sm text-center font-mono">{valueData.score}</span>
+											</div>
+										</div>
 									{/each}
 								</div>
 							</div>
-						{/if}
-
-						{#if item.url}
-							<div class="mt-4 pt-3 border-t border-gray-300">
-								<a 
-									href={item.url} 
-									target="_blank" 
-									rel="noopener noreferrer"
-									class="text-blue-600 hover:text-blue-800 text-sm"
-								>
-									View Product Page →
-								</a>
-							</div>
-						{/if}
-					</div>
-				{/if}
-			</div>
-		{/each}
+						</div>
+					{/if}
+				</div>
+			{/each}
+		</div>
 	</div>
 </div>

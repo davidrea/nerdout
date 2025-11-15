@@ -15,8 +15,6 @@
 	let searchTerm: string = '';
 	let highlightedItem: string | null = null;
 	let currentSection: 'nerdout' | 'nerdwayout' | 'nerdwaywayout' = 'nerdout';
-	let plotCompact = false;
-	let scrollTimeout: number;
 
 	// Initialize data
 	onMount(() => {
@@ -108,43 +106,6 @@
 		}
 	}
 
-	// Update plot compact mode based on scroll position
-	function handleScroll() {
-		// Clear previous timeout
-		if (scrollTimeout) {
-			clearTimeout(scrollTimeout);
-		}
-		
-		// Debounce the scroll handling
-		scrollTimeout = setTimeout(() => {
-			const nerdOutSection = document.getElementById('nerdout');
-			
-			if (nerdOutSection) {
-				const nerdOutRect = nerdOutSection.getBoundingClientRect();
-				const scrollY = window.scrollY;
-				
-				// Simple logic with hysteresis to prevent flickering
-				if (scrollY < 300) {
-					// Near top - definitely normal
-					plotCompact = false;
-				} else if (scrollY > 500 && nerdOutRect.bottom < 50) {
-					// Well scrolled down and section is out of view - compact
-					plotCompact = true;
-				}
-				// Don't change state in between to prevent flickering
-			}
-		}, 50); // 50ms debounce
-	}
-
-	onMount(() => {
-		window.addEventListener('scroll', handleScroll);
-		return () => {
-			window.removeEventListener('scroll', handleScroll);
-			if (scrollTimeout) {
-				clearTimeout(scrollTimeout);
-			}
-		};
-	});
 </script>
 
 <svelte:head>
@@ -214,37 +175,21 @@
 		</div>
 
 		<!-- Nerd Out Section -->
-		<section id="nerdout" class="mb-12 relative">
-			<!-- Space reservation when plot is compact -->
-			{#if plotCompact}
-				<div class="h-[580px]"></div> <!-- Reserve space for full plot + margins when compact -->
-			{/if}
-			
-			<div 
-				class="{plotCompact ? 'fixed top-20 right-4 z-40 bg-white p-4 rounded-lg shadow-lg' : ''}"
-				style={plotCompact ? 'overflow: visible;' : ''}
-			>
-				<NerdOut
-					items={filteredItems}
-					{criteria}
-					{highlightedItem}
-					onItemHover={handleItemHover}
-					onItemClick={handleItemClick}
-					compact={plotCompact}
-				/>
-			</div>
+		<section id="nerdout" class="mb-12">
+			<NerdOut
+				items={filteredItems}
+				{criteria}
+				{highlightedItem}
+				onItemHover={handleItemHover}
+				onItemClick={handleItemClick}
+			/>
 		</section>
 
 		<!-- Nerd Way Out Section -->
 		<section id="nerdwayout" class="mb-12">
 			<NerdWayOut
-				items={filteredItems}
 				{criteria}
-				{highlightedItem}
-				onItemUpdate={handleItemUpdate}
-				onItemDelete={handleItemDelete}
-				onItemHighlight={handleItemHighlight}
-				on:addItem={handleItemAdd}
+				onCriteriaUpdate={handleCriteriaUpdate}
 			/>
 		</section>
 

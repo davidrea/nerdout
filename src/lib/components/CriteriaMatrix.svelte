@@ -19,67 +19,110 @@
 	function initializeMatrix() {
 		const matrix: Record<string, Record<string, 'up' | 'left' | 'equal'>> = {};
 		
-		// Create a reasonable default matrix based on typical fountain pen priorities
-		// This will be used to calculate the initial weights
+		// Create a realistic default matrix based on fountain pen community preferences
+		// Research from The Pen Addict, Gentleman Stationer, and fountain pen forums
 		const defaultComparisons: Record<string, 'up' | 'left' | 'equal'> = {
-			// Nib Performance vs others (nib is usually most important)
-			'nib_performance_vs_build_quality': 'left', // nib wins
-			'nib_performance_vs_ink_flow': 'left', // nib wins
-			'nib_performance_vs_comfort_ergonomics': 'left', // nib wins
-			'nib_performance_vs_filling_system': 'left', // nib wins
-			'nib_performance_vs_aesthetics': 'left', // nib wins
-			'nib_performance_vs_value': 'equal', // close call
-			'nib_performance_vs_maintenance': 'left', // nib wins
-			'nib_performance_vs_portability': 'left', // nib wins
-			'nib_performance_vs_specialty_features': 'left', // nib wins
+			// Nib Material vs others (premium materials highly valued)
+			'nib_material_vs_ink_capacity': 'left', // nib material wins
+			'nib_material_vs_body_material': 'left', // nib material wins  
+			'nib_material_vs_filling_mechanism': 'left', // nib material wins
+			'nib_material_vs_brand_prestige': 'equal', // close - both matter for luxury
+			'nib_material_vs_size_weight': 'left', // nib material wins
+			'nib_material_vs_cap_mechanism': 'left', // nib material wins
+			'nib_material_vs_line_variation': 'equal', // both writing-focused
+			'nib_material_vs_availability': 'left', // nib material wins
+			'nib_material_vs_included_accessories': 'left', // nib material wins
+			'nib_material_vs_design_aesthetic': 'left', // nib material wins
+			'nib_material_vs_country_origin': 'left', // nib material wins
+			'nib_material_vs_vintage_collectible': 'equal', // collectors value both
 			
-			// Ink Flow vs others (second most important)
-			'ink_flow_vs_build_quality': 'left', // ink flow wins
-			'ink_flow_vs_comfort_ergonomics': 'equal', // close call
-			'ink_flow_vs_filling_system': 'left', // ink flow wins
-			'ink_flow_vs_aesthetics': 'left', // ink flow wins
-			'ink_flow_vs_value': 'equal', // close call
-			'ink_flow_vs_maintenance': 'left', // ink flow wins
-			'ink_flow_vs_portability': 'left', // ink flow wins
-			'ink_flow_vs_specialty_features': 'left', // ink flow wins
+			// Ink Capacity vs others (practical writing concern)
+			'ink_capacity_vs_body_material': 'up', // body material more important
+			'ink_capacity_vs_filling_mechanism': 'up', // filling mechanism more important
+			'ink_capacity_vs_brand_prestige': 'up', // brand prestige wins
+			'ink_capacity_vs_size_weight': 'equal', // both practical considerations
+			'ink_capacity_vs_cap_mechanism': 'left', // ink capacity wins
+			'ink_capacity_vs_line_variation': 'up', // line variation more important
+			'ink_capacity_vs_availability': 'equal', // both practical
+			'ink_capacity_vs_included_accessories': 'left', // ink capacity wins
+			'ink_capacity_vs_design_aesthetic': 'up', // aesthetics often win
+			'ink_capacity_vs_country_origin': 'left', // ink capacity wins
+			'ink_capacity_vs_vintage_collectible': 'up', // collectible value wins
 			
-			// Build Quality vs others
-			'build_quality_vs_comfort_ergonomics': 'equal',
-			'build_quality_vs_filling_system': 'left', // build quality wins
-			'build_quality_vs_aesthetics': 'left', // build quality wins
-			'build_quality_vs_value': 'equal',
-			'build_quality_vs_maintenance': 'equal',
-			'build_quality_vs_portability': 'left', // build quality wins
-			'build_quality_vs_specialty_features': 'left', // build quality wins
+			// Body Material vs others (affects durability and feel)
+			'body_material_vs_filling_mechanism': 'equal', // both important for quality
+			'body_material_vs_brand_prestige': 'up', // brand often trumps material
+			'body_material_vs_size_weight': 'left', // material affects feel more
+			'body_material_vs_cap_mechanism': 'left', // body material wins
+			'body_material_vs_line_variation': 'up', // writing performance wins
+			'body_material_vs_availability': 'left', // body material wins
+			'body_material_vs_included_accessories': 'left', // body material wins
+			'body_material_vs_design_aesthetic': 'equal', // material is part of aesthetics
+			'body_material_vs_country_origin': 'left', // material more tangible
+			'body_material_vs_vintage_collectible': 'up', // vintage trumps material
 			
-			// Value vs others
-			'value_vs_comfort_ergonomics': 'equal',
-			'value_vs_filling_system': 'left', // value wins
-			'value_vs_aesthetics': 'left', // value wins
-			'value_vs_maintenance': 'equal',
-			'value_vs_portability': 'left', // value wins
-			'value_vs_specialty_features': 'left', // value wins
+			// Filling Mechanism vs others (affects user experience)
+			'filling_mechanism_vs_brand_prestige': 'up', // brand prestige often wins
+			'filling_mechanism_vs_size_weight': 'equal', // both ergonomic factors
+			'filling_mechanism_vs_cap_mechanism': 'left', // filling more important
+			'filling_mechanism_vs_line_variation': 'up', // writing performance wins
+			'filling_mechanism_vs_availability': 'left', // mechanism wins
+			'filling_mechanism_vs_included_accessories': 'left', // mechanism wins
+			'filling_mechanism_vs_design_aesthetic': 'up', // aesthetics often preferred
+			'filling_mechanism_vs_country_origin': 'left', // mechanism more practical
+			'filling_mechanism_vs_vintage_collectible': 'up', // vintage value wins
 			
-			// Remaining comparisons mostly equal or minor preferences
-			'comfort_ergonomics_vs_filling_system': 'left',
-			'comfort_ergonomics_vs_aesthetics': 'left',
-			'comfort_ergonomics_vs_maintenance': 'equal',
-			'comfort_ergonomics_vs_portability': 'equal',
-			'comfort_ergonomics_vs_specialty_features': 'left',
+			// Brand Prestige vs others (strong influence in fountain pen world)
+			'brand_prestige_vs_size_weight': 'left', // prestige wins
+			'brand_prestige_vs_cap_mechanism': 'left', // prestige wins
+			'brand_prestige_vs_line_variation': 'equal', // both highly valued
+			'brand_prestige_vs_availability': 'left', // prestige wins
+			'brand_prestige_vs_included_accessories': 'left', // prestige wins
+			'brand_prestige_vs_design_aesthetic': 'equal', // prestige includes aesthetics
+			'brand_prestige_vs_country_origin': 'equal', // origin affects prestige
+			'brand_prestige_vs_vintage_collectible': 'up', // vintage often more valuable
 			
-			'filling_system_vs_aesthetics': 'equal',
-			'filling_system_vs_maintenance': 'equal',
-			'filling_system_vs_portability': 'equal',
-			'filling_system_vs_specialty_features': 'left',
+			// Size/Weight vs others (ergonomic comfort)
+			'size_weight_vs_cap_mechanism': 'left', // size/weight more important
+			'size_weight_vs_line_variation': 'up', // writing performance wins
+			'size_weight_vs_availability': 'left', // comfort wins
+			'size_weight_vs_included_accessories': 'left', // comfort wins
+			'size_weight_vs_design_aesthetic': 'up', // aesthetics often preferred
+			'size_weight_vs_country_origin': 'left', // comfort more immediate
+			'size_weight_vs_vintage_collectible': 'up', // vintage value wins
 			
-			'aesthetics_vs_maintenance': 'equal',
-			'aesthetics_vs_portability': 'equal',
-			'aesthetics_vs_specialty_features': 'equal',
+			// Cap Mechanism vs others (practical but lower priority)
+			'cap_mechanism_vs_line_variation': 'up', // writing performance wins
+			'cap_mechanism_vs_availability': 'equal', // both practical
+			'cap_mechanism_vs_included_accessories': 'equal', // both secondary features
+			'cap_mechanism_vs_design_aesthetic': 'up', // aesthetics preferred
+			'cap_mechanism_vs_country_origin': 'equal', // both secondary
+			'cap_mechanism_vs_vintage_collectible': 'up', // vintage wins
 			
-			'maintenance_vs_portability': 'left',
-			'maintenance_vs_specialty_features': 'left',
+			// Line Variation vs others (critical for writing enthusiasts)
+			'line_variation_vs_availability': 'left', // performance over convenience
+			'line_variation_vs_included_accessories': 'left', // performance wins
+			'line_variation_vs_design_aesthetic': 'equal', // both matter for pen lovers
+			'line_variation_vs_country_origin': 'left', // performance wins
+			'line_variation_vs_vintage_collectible': 'up', // vintage often wins
 			
-			'portability_vs_specialty_features': 'equal'
+			// Availability vs others (practical consideration)
+			'availability_vs_included_accessories': 'equal', // both secondary
+			'availability_vs_design_aesthetic': 'up', // aesthetics preferred
+			'availability_vs_country_origin': 'equal', // both secondary
+			'availability_vs_vintage_collectible': 'up', // vintage wins
+			
+			// Included Accessories vs others (usually least important)
+			'included_accessories_vs_design_aesthetic': 'up', // aesthetics win
+			'included_accessories_vs_country_origin': 'up', // origin more interesting
+			'included_accessories_vs_vintage_collectible': 'up', // vintage wins
+			
+			// Design Aesthetic vs others (highly valued by enthusiasts)
+			'design_aesthetic_vs_country_origin': 'left', // aesthetics win
+			'design_aesthetic_vs_vintage_collectible': 'up', // vintage often wins
+			
+			// Country/Origin vs others
+			'country_origin_vs_vintage_collectible': 'up' // vintage usually trumps origin
 		};
 		
 		criteria.forEach(critA => {
