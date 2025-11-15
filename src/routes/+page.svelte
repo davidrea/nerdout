@@ -146,19 +146,19 @@
 				<nav class="flex space-x-4">
 					<button
 						on:click={() => scrollToSection('nerdout')}
-						class="px-3 py-2 text-sm font-medium rounded-md transition-colors {currentSection === 'nerdout' ? 'bg-ink-100 text-ink-800' : 'text-charcoal-light hover:text-ink-900 hover:bg-parchment-200'}"
+						class="px-3 py-2 text-sm font-medium rounded-md transition-colors {currentSection === 'nerdout' ? 'bg-brass-400 text-ink-900' : 'text-charcoal-light hover:text-ink-900 hover:bg-parchment-200'}"
 					>
 						Nerd Out
 					</button>
 					<button
 						on:click={() => scrollToSection('nerdwayout')}
-						class="px-3 py-2 text-sm font-medium rounded-md transition-colors {currentSection === 'nerdwayout' ? 'bg-ink-100 text-ink-800' : 'text-charcoal-light hover:text-ink-900 hover:bg-parchment-200'}"
+						class="px-3 py-2 text-sm font-medium rounded-md transition-colors {currentSection === 'nerdwayout' ? 'bg-brass-400 text-ink-900' : 'text-charcoal-light hover:text-ink-900 hover:bg-parchment-200'}"
 					>
 						Nerd Way Out
 					</button>
 					<button
 						on:click={() => scrollToSection('nerdwaywayout')}
-						class="px-3 py-2 text-sm font-medium rounded-md transition-colors {currentSection === 'nerdwaywayout' ? 'bg-ink-100 text-ink-800' : 'text-charcoal-light hover:text-ink-900 hover:bg-parchment-200'}"
+						class="px-3 py-2 text-sm font-medium rounded-md transition-colors {currentSection === 'nerdwaywayout' ? 'bg-brass-400 text-ink-900' : 'text-charcoal-light hover:text-ink-900 hover:bg-parchment-200'}"
 					>
 						Nerd Way Way Out
 					</button>

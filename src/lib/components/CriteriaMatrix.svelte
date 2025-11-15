@@ -218,9 +218,9 @@
 
 		const comparison = comparisonMatrix[rowId]?.[colId];
 		switch (comparison) {
-			case 'up': return 'bg-ink-100 hover:bg-ink-200';
-			case 'left': return 'bg-brass-100 hover:bg-brass-200';
-			case 'equal': return 'bg-parchment-200 hover:bg-parchment-300';
+			case 'up': return 'bg-ink-300 hover:bg-ink-400';
+			case 'left': return 'bg-brass-400 hover:bg-brass-500';
+			case 'equal': return 'bg-parchment-300 hover:bg-parchment-400';
 			default: return 'bg-parchment-100 hover:bg-parchment-200';
 		}
 	}
@@ -246,9 +246,9 @@
 		<p class="text-sm text-charcoal-light mb-4">
 			Compare each pair of criteria. Click the upper-right cells to cycle through:
 			<span class="inline-flex items-center space-x-1">
-				<span class="px-2 py-1 bg-ink-100 rounded text-xs">↑ Column higher priority</span>
-				<span class="px-2 py-1 bg-brass-100 rounded text-xs">← Row higher priority</span>
-				<span class="px-2 py-1 bg-parchment-200 rounded text-xs">= Equal priority</span>
+				<span class="px-2 py-1 bg-ink-300 rounded text-xs">↑ Column higher priority</span>
+				<span class="px-2 py-1 bg-brass-400 rounded text-xs">← Row higher priority</span>
+				<span class="px-2 py-1 bg-parchment-300 rounded text-xs">= Equal priority</span>
 			</span>
 		</p>
 
