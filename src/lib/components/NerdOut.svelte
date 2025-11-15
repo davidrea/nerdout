@@ -6,16 +6,22 @@
 	import type { Item, Criterion } from '../types';
 	import { calculateItemScore } from '../scoring';
 
+	type PlotItem = Item & { score: number };
+	type SpecEntry = [string, string | string[] | null];
+	const QUICK_FIND_INPUT_ID = 'nerdout-quick-find';
+
 	export let items: Item[] = [];
 	export let criteria: Criterion[] = [];
 	export let highlightedItem: string | null = null;
 	export let onItemHover: (item: Item | null) => void = () => {};
-	export let onItemClick: (item: Item) => void = () => {};
 
 	let svgElement: SVGSVGElement;
 	let expandedItems: Set<string> = new Set();
 	let tooltip: HTMLDivElement;
 	let containerElement: HTMLDivElement;
+	let listSearchTerm: string = '';
+	let selectedItemId: string | null = null;
+	let selectedItemSpecs: SpecEntry[] = [];
 	
 	// Responsive dimensions
 	let containerWidth = 800;
@@ -37,6 +43,17 @@
 		...item,
 		score: calculateItemScore(item, criteria || [])
 	}));
+	$: sortedPlotData = [...(plotData || [])].sort((a, b) => b.score - a.score);
+	$: normalizedListSearch = listSearchTerm.trim().toLowerCase();
+	$: filteredListItems = normalizedListSearch
+			? sortedPlotData.filter(item => matchesListSearch(item, normalizedListSearch))
+			: sortedPlotData;
+	$: visibleListItems = normalizedListSearch ? filteredListItems : [];
+	$: selectedItem = plotData.find(item => item.id === selectedItemId) || null;
+	$: selectedItemSpecs = extractDetailSpecs(selectedItem);
+	$: if (selectedItemId && !(plotData || []).some(item => item.id === selectedItemId)) {
+		selectedItemId = null;
+	}
 
 	function getNibMaterialColor(nibMaterial: string): string {
 		if (!nibMaterial) return 'transparent'; // Empty/outlined for unknown
@@ -64,6 +81,46 @@
 	// Update highlighting separately to avoid full re-render
 	$: if (svgElement && highlightedItem !== undefined) {
 		updateHighlighting();
+	}
+
+	function matchesListSearch(item: PlotItem, normalizedTerm: string): boolean {
+		if (!normalizedTerm) return true;
+		const searchableStrings: string[] = [
+			item.name,
+			item.description || '',
+			String(item.cost),
+			item.specs?.nib_material || ''
+		];
+
+		Object.values(item.specs || {}).forEach(value => {
+			if (value === null) return;
+			if (Array.isArray(value)) {
+				searchableStrings.push(value.join(' '));
+			} else {
+				searchableStrings.push(String(value));
+			}
+		});
+
+		return searchableStrings.some(text => text.toLowerCase().includes(normalizedTerm));
+	}
+
+	function formatSpecValue(value: unknown): string {
+		if (value === null || value === undefined) return 'N/A';
+		if (Array.isArray(value)) {
+			return value.join(', ');
+		}
+		return String(value).replace(/_/g, ' ');
+	}
+
+	function focusItem(itemId: string) {
+		selectedItemId = itemId;
+	}
+
+	function extractDetailSpecs(item: PlotItem | null): SpecEntry[] {
+		if (!item) return [];
+		return Object.entries(item.specs || {})
+			.filter(([, value]) => value !== null)
+			.slice(0, 6) as SpecEntry[];
 	}
 
 	function updateHighlighting() {
@@ -217,29 +274,10 @@
 				// Expand the accordion for this item
 				expandedItems.add(d.id);
 				expandedItems = expandedItems;
+				focusItem(d.id);
 				
 				// Briefly highlight the item being navigated to
 				onItemHover(d);
-				
-				// Scroll to the pen in the list after expansion animation starts
-				setTimeout(() => {
-					const penElement = document.getElementById(`pen-${d.id}`);
-					if (penElement) {
-						// Add a temporary highlight effect
-						penElement.style.transform = 'scale(1.02)';
-						penElement.style.transition = 'transform 0.2s ease-out';
-						
-						penElement.scrollIntoView({ 
-							behavior: 'smooth', 
-							block: 'center' 
-						});
-						
-						// Remove highlight effect
-						setTimeout(() => {
-							penElement.style.transform = '';
-						}, 600);
-					}
-				}, 200); // Delay to allow accordion animation to start
 			});
 	}
 
@@ -291,6 +329,23 @@
 		expandedItems = expandedItems;
 	}
 
+	function handleListItemClick(itemId: string) {
+		focusItem(itemId);
+		toggleExpand(itemId);
+	}
+
+	function handleListItemKeydown(event: KeyboardEvent, itemId: string) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			handleListItemClick(itemId);
+		}
+	}
+
+	function focusQuickFindInput() {
+		const input = document.getElementById(QUICK_FIND_INPUT_ID) as HTMLInputElement | null;
+		input?.focus();
+	}
+
 	onMount(() => {
 		updateDimensions();
 		renderPlot();
@@ -321,31 +376,159 @@
 	</div>
 	
 	<!-- Plot Section -->
-	<div class="relative">
-		<div bind:this={containerElement} class="w-full">
-			<svg 
-				bind:this={svgElement}
-				width={svgWidth} 
-				height={svgHeight}
-				viewBox="0 0 {svgWidth} {svgHeight}"
-				class="border border-gray-300 rounded w-full h-auto max-w-full"
-				style="overflow: visible;"
-			></svg>
+	<div class="grid gap-6 lg:grid-cols-3">
+		<div class="relative lg:col-span-2">
+			<div bind:this={containerElement} class="w-full">
+				<svg 
+					bind:this={svgElement}
+					width={svgWidth} 
+					height={svgHeight}
+					viewBox="0 0 {svgWidth} {svgHeight}"
+					class="border border-gray-300 rounded w-full h-auto max-w-full"
+					style="overflow: visible;"
+				></svg>
+			</div>
+			
+			<div 
+				bind:this={tooltip}
+				class="absolute pointer-events-none opacity-0 bg-white border border-gray-300 rounded shadow-lg p-3 text-sm transition-opacity duration-200 z-50 max-w-xs"
+				style="display: none;"
+			></div>
 		</div>
-		
-		<div 
-			bind:this={tooltip}
-			class="absolute pointer-events-none opacity-0 bg-white border border-gray-300 rounded shadow-lg p-3 text-sm transition-opacity duration-200 z-50 max-w-xs"
-			style="display: none;"
-		></div>
+
+		<div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm h-full">
+			<div class="flex items-center justify-between">
+				<h3 class="text-lg font-semibold">Selected Fountain Pen</h3>
+				{#if selectedItem}
+					<span class="text-sm text-gray-600 font-medium">
+						Score {selectedItem.score.toFixed(1)}
+					</span>
+				{/if}
+			</div>
+
+			{#if selectedItem}
+				<div class="mt-3 flex flex-col gap-4 text-sm text-gray-700">
+					<div>
+						<div class="text-xl font-bold text-gray-900">{selectedItem.name}</div>
+						<div class="text-sm text-gray-500 mt-1">
+							Cost ${selectedItem.cost} • {selectedItem.specs.nib_material?.replace(/_/g, ' ') || 'Nib material unknown'}
+						</div>
+					</div>
+
+					{#if selectedItem.description}
+						<p class="text-gray-600">{selectedItem.description}</p>
+					{/if}
+
+					<div class="grid grid-cols-2 gap-3">
+						<div class="rounded border border-gray-200 p-2 bg-gray-50">
+							<div class="text-xs uppercase text-gray-500">Cost</div>
+							<div class="text-lg font-semibold text-gray-900">${selectedItem.cost}</div>
+						</div>
+						<div class="rounded border border-gray-200 p-2 bg-gray-50">
+							<div class="text-xs uppercase text-gray-500">Score</div>
+							<div class="text-lg font-semibold text-gray-900">{selectedItem.score.toFixed(1)}</div>
+						</div>
+					</div>
+
+					<div>
+						<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+							Key specs
+						</h4>
+						{#if selectedItemSpecs.length === 0}
+							<p class="text-gray-500 text-sm">No specs available for this pen.</p>
+						{:else}
+							<div class="space-y-1 text-sm">
+								{#each selectedItemSpecs as [key, value]}
+									<div class="flex justify-between gap-3">
+										<span class="text-gray-500 capitalize">{key.replace(/_/g, ' ')}</span>
+										<span class="font-medium text-gray-900 text-right">{formatSpecValue(value)}</span>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
+
+					{#if selectedItem.url}
+						<a 
+							href={selectedItem.url} 
+							target="_blank" 
+							rel="noopener noreferrer"
+							class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+						>
+							View product page →
+						</a>
+					{/if}
+				</div>
+			{:else}
+				<p class="text-sm text-gray-600 mt-3">
+					Click any dot in the plot or a pen in the list to spotlight its specs here without scrolling the full catalog.
+				</p>
+			{/if}
+		</div>
 	</div>
 
 	<!-- Pen List Section -->
 	{#if plotData && plotData.length > 0}
 		<div class="mt-8">
-			<h3 class="text-lg font-semibold mb-4">All Fountain Pens</h3>
-			<div class="space-y-2">
-				{#each plotData as item (item.id)}
+				<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+					<div>
+						<h3 class="text-lg font-semibold">Search Fountain Pens</h3>
+						{#if normalizedListSearch}
+							<p class="text-sm text-gray-500">
+								{visibleListItems.length} match{visibleListItems.length === 1 ? '' : 'es'} for "{listSearchTerm}"
+							</p>
+						{:else}
+							<p class="text-sm text-gray-500">
+								Enter a quick find query to reveal pens from the full catalog.
+							</p>
+						{/if}
+					</div>
+
+				<div class="w-full sm:w-80">
+					<label
+						for={QUICK_FIND_INPUT_ID}
+						class="block text-xs uppercase tracking-wide text-gray-500 mb-1"
+					>
+						Quick find
+					</label>
+					<input
+						id={QUICK_FIND_INPUT_ID}
+						type="text"
+						placeholder="Start typing a pen name, nib, or spec..."
+						bind:value={listSearchTerm}
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+					/>
+				</div>
+			</div>
+
+			{#if !normalizedListSearch}
+				<div class="mt-4 border border-dashed border-gray-300 rounded-lg bg-white p-4 shadow-sm">
+					<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+						<div>
+							<p class="font-semibold text-gray-900">
+								Start typing to explore the catalog
+							</p>
+							<p class="text-sm text-gray-600">
+								Use the quick find input above to filter hundreds of pens by name, nib material, filling system, or any other spec.
+							</p>
+						</div>
+						<div class="text-3xl sm:text-4xl text-blue-500 sm:self-start" aria-hidden="true">↑</div>
+					</div>
+					<button
+						on:click={focusQuickFindInput}
+						type="button"
+						class="mt-4 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+					>
+						Jump to quick find field
+					</button>
+				</div>
+			{:else if visibleListItems.length === 0}
+				<p class="mt-4 text-sm text-gray-600">
+					No pens match "{listSearchTerm}". Try a different name, nib material, or spec keyword.
+				</p>
+			{:else}
+			<div class="space-y-2 mt-4">
+				{#each visibleListItems as item (item.id)}
 				{@const isHighlighted = highlightedItem === item.id}
 				{@const isExpanded = expandedItems.has(item.id)}
 				<div 
@@ -355,9 +538,12 @@
 					<!-- Main pen info - clickable to expand -->
 					<div 
 						class="p-4 cursor-pointer hover:bg-gray-50"
+						role="button"
+						tabindex="0"
 						on:mouseenter={() => onItemHover(item)}
 						on:mouseleave={() => onItemHover(null)}
-						on:click={() => toggleExpand(item.id)}
+						on:click={() => handleListItemClick(item.id)}
+						on:keydown={(event) => handleListItemKeydown(event, item.id)}
 					>
 						<div class="flex items-center justify-between">
 							<div class="flex-1">
@@ -448,7 +634,8 @@
 					{/if}
 				</div>
 			{/each}
+			</div>
+			{/if}
 		</div>
-	</div>
 	{/if}
 </div>

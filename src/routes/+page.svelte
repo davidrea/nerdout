@@ -72,12 +72,6 @@
 		highlightedItem = item?.id || null;
 	}
 
-	function handleItemClick(item: Item) {
-		if (item.url) {
-			window.open(item.url, '_blank');
-		}
-	}
-
 	function handleCriteriaUpdate(updatedCriteria: Criterion[]) {
 		// Force reactivity by creating a new array
 		criteria = [...updatedCriteria.map(c => ({ ...c }))];
@@ -181,7 +175,6 @@
 				{criteria}
 				{highlightedItem}
 				onItemHover={handleItemHover}
-				onItemClick={handleItemClick}
 			/>
 		</section>
 
