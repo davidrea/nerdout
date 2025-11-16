@@ -5,6 +5,8 @@
 	import * as d3 from 'd3';
 	import type { Item, Criterion } from '../types';
 	import { calculateItemScore } from '../scoring';
+	import ReportIssueForm from './ReportIssueForm.svelte';
+	import SubmitPenForm from './SubmitPenForm.svelte';
 
 	type PlotItem = Item & { score: number };
 	type SpecEntry = [string, string | string[] | null];
@@ -14,6 +16,12 @@
 	export let criteria: Criterion[] = [];
 	export let highlightedItem: string | null = null;
 	export let onItemHover: (item: Item | null) => void = () => {};
+
+	// Modal state for forms
+	let isReportModalOpen = false;
+	let isSubmitPenModalOpen = false;
+	let reportPenName = '';
+	let reportPenId = '';
 
 	let svgElement: SVGSVGElement;
 	let expandedItems: Set<string> = new Set();
@@ -346,6 +354,24 @@
 		input?.focus();
 	}
 
+	function openReportModal(penId: string, penName: string) {
+		reportPenId = penId;
+		reportPenName = penName;
+		isReportModalOpen = true;
+	}
+
+	function closeReportModal() {
+		isReportModalOpen = false;
+	}
+
+	function openSubmitPenModal() {
+		isSubmitPenModalOpen = true;
+	}
+
+	function closeSubmitPenModal() {
+		isSubmitPenModalOpen = false;
+	}
+
 	onMount(() => {
 		updateDimensions();
 		renderPlot();
@@ -369,7 +395,15 @@
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
-		<h2 class="text-2xl font-bold">Nerd Out</h2>
+		<div class="flex items-center gap-4">
+			<h2 class="text-2xl font-bold">Nerd Out</h2>
+			<button
+				on:click={openSubmitPenModal}
+				class="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
+			>
+				Submit a Pen
+			</button>
+		</div>
 		<div class="text-sm text-gray-600">
 			{plotData?.length || 0} pens • Interactive plot and list
 		</div>
@@ -431,9 +465,19 @@
 					</div>
 
 					<div>
-						<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-							Key specs
-						</h4>
+						<div class="flex items-center gap-2 mb-2">
+							<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+								Key specs
+							</h4>
+							<button
+								on:click={() => openReportModal(selectedItem.id, selectedItem.name)}
+								class="text-lg hover:scale-110 transition-transform cursor-pointer"
+								title="Report incorrect information"
+								aria-label="Report incorrect information"
+							>
+								🤬
+							</button>
+						</div>
 						{#if selectedItemSpecs.length === 0}
 							<p class="text-gray-500 text-sm">No specs available for this pen.</p>
 						{:else}
@@ -596,11 +640,21 @@
 
 					<!-- Expandable specifications section -->
 					{#if isExpanded}
-						<div 
+						<div
 							class="border-t border-gray-200 p-4 bg-gray-50"
 							transition:slide={{ duration: 400, easing: quintOut }}
 						>
-							<h5 class="font-medium text-gray-900 mb-3">Specifications</h5>
+							<div class="flex items-center gap-2 mb-3">
+								<h5 class="font-medium text-gray-900">Specifications</h5>
+								<button
+									on:click|stopPropagation={() => openReportModal(item.id, item.name)}
+									class="text-lg hover:scale-110 transition-transform cursor-pointer"
+									title="Report incorrect information"
+									aria-label="Report incorrect information"
+								>
+									🤬
+								</button>
+							</div>
 							<div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
 								{#each Object.entries(item.specs) as [key, value]}
 									{#if value !== null}
@@ -639,3 +693,16 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Modals -->
+<ReportIssueForm
+	isOpen={isReportModalOpen}
+	penName={reportPenName}
+	penId={reportPenId}
+	onClose={closeReportModal}
+/>
+
+<SubmitPenForm
+	isOpen={isSubmitPenModalOpen}
+	onClose={closeSubmitPenModal}
+/>
